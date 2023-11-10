@@ -16,6 +16,8 @@ export default function Register() {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const userDataJSON = sessionStorage.getItem("userData");
+  const userData = JSON.parse(userDataJSON);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -36,6 +38,7 @@ export default function Register() {
     createUserWithEmailAndPassword(auth, formData.email, formData.password)
       .then((userCredential) => {
         console.log(userCredential);
+        sessionStorage.setItem("userData", JSON.stringify(userCredential));
         router.push("/home");
       })
       .catch((error) => {

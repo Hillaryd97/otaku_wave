@@ -37,11 +37,17 @@ function NewPostModal({ addPostModal }) {
     <div
       ref={modalRef}
       className={`fixed inset-0 flex items-center justify-center bg-background bg-opacity-75 overlay animate__animated ${
-        addPostModal ? "animate__bounceInUp faster" : "animate__bounceOutDown faster"
+        addPostModal
+          ? "animate__bounceInUp faster"
+          : "animate__bounceOutDown faster"
       }`}
       onClick={handleOverlayClick}
     >
-      <div className={`w-full max-w-md bg-white p-4 mx-1.5 rounded-md shadow-md animate__animated ${addPostModal ? "animate__bounceInUp faster" : ""}`}>
+      <div
+        className={`w-full max-w-md bg-white p-4 mx-1.5 rounded-md shadow-md animate__animated ${
+          addPostModal ? "animate__bounceInUp faster" : ""
+        }`}
+      >
         <div className="flex items-center justify-between">
           <p className="font-semibold text-gray-700">New Post</p>
           <button

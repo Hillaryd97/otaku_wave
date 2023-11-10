@@ -24,18 +24,18 @@ function BottomNav() {
     dispatch(setActiveItem(item));
   };
 
-  // Define the names of the pages that correspond to the navigation items
   const pages = ["/home", "/topic", "/search", "/events", "/profile"];
-  const router = useRouter(); // Get the current router instance
+  const iconDescriptions = ["Home", "Topics", "Search", "Events", "Profile"];
+  const router = useRouter();
 
-  useEffect(() => {
-    if (activeItem === "/home") {
-      router.push("/home");
-    }
-  }, [activeItem, router]);
+  // useEffect(() => {
+  //   if (activeItem === "/home") {
+  //     router.push("/home");
+  //   }
+  // }, [activeItem, router]);
 
   return (
-    <nav className="fixed w-full bottom-0 pt-2.5 px-3 pb-5 bg-opacity-80 bg-background shadow-md border-t-2 border-secondary">
+    <nav className="fixed w-full bottom-0 pt-2.5 px-4 pb-5 bg-opacity-80 bg-background shadow-md border-t-2 border-secondary">
       <div className="flex items-center md:justify-around justify-between">
         {pages.map((page, index) => (
           <Link
@@ -48,11 +48,56 @@ function BottomNav() {
             }`}
             onClick={() => handleItemClick(page)}
           >
-            {index === 0 && <AiFillHome size={32} />}
-            {index === 1 && <HiUserGroup size={32} />}
-            {index === 2 && <BsSearch size={32} />}
-            {index === 3 && <BsFillCalendar2EventFill size={30} />}
-            {index === 4 && <BsFillPersonFill size={32} />}
+            {index === 0 && (
+              <div className="flex flex-col items-center justify-center">
+                <AiFillHome size={28} />
+                {activeItem === page && (
+                  <span className="text-xs duration-300">
+                    {iconDescriptions[index]}
+                  </span>
+                )}
+              </div>
+            )}
+            {index === 1 && (
+              <div className="flex flex-col items-center justify-center">
+                <HiUserGroup size={28} />
+                {activeItem === page && (
+                  <span className="text-xs duration-300">
+                    {iconDescriptions[index]}
+                  </span>
+                )}
+              </div>
+            )}
+            {index === 2 && (
+              <div className="flex flex-col items-center justify-center">
+                <BsSearch size={28} />
+                {activeItem === page && (
+                  <span className="text-xs duration-300">
+                    {iconDescriptions[index]}
+                  </span>
+                )}
+              </div>
+            )}
+            {index === 3 && (
+              <div className="flex flex-col items-center justify-center">
+                <BsFillCalendar2EventFill size={28} />
+                {activeItem === page && (
+                  <span className="text-xs duration-300">
+                    {iconDescriptions[index]}
+                  </span>
+                )}
+              </div>
+            )}
+            {index === 4 && (
+              <div className="flex flex-col items-center justify-center">
+                <BsFillPersonFill size={28} />
+                {activeItem === page && (
+                  <span className="text-xs duration-300">
+                    {iconDescriptions[index]}
+                  </span>
+                )}
+              </div>
+            )}
           </Link>
         ))}
       </div>
