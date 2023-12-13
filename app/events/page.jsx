@@ -1,10 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import BottomNav from "../ui/bottomNav";
 import { IoIosNotifications } from "react-icons/io";
 
 function Events() {
+  const [airingSchedules, setAiringSchedules] = useState([]);
+
+  useEffect(() => {
+   
+    const fetchData = async () => {
+      
+    };
+    fetchData();
+  }, []);
+
   return (
     <main className="bg-background flex h-screen w-full items-center justify-center text-center">
       <nav className="absolute w-full mb-10 top-0 px-3 py-2 opacity-80 bg-background shadow-sm ">
@@ -16,8 +26,14 @@ function Events() {
           </div>
         </div>
       </nav>
-      <div className="flex h-96 w-full items-center justify-center text-center">
-        Events
+      <div className="flex flex-col w-full items-center justify-center text-center">
+        {/* {airingSchedules.map((schedule) => (
+          <div key={schedule.airingAt}>
+            <p>
+              Title:{" "}
+            </p>
+          </div>
+        ))} */}
       </div>
       <BottomNav />
     </main>

@@ -8,10 +8,12 @@ import { auth } from "../firebase";
 import { logIn, logOut } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const Swal = require("sweetalert2");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -32,10 +34,21 @@ export default function Register() {
       .then((userCredential) => {
         console.log(userCredential);
         sessionStorage.setItem("userData", JSON.stringify(userCredential));
-        router.push("/home");
+        router.push("/profile");
       })
       .catch((error) => {
-        console.log(error);
+        if (error.code === "auth/invalid-login-credentials") {
+          Swal.fire("Invalid Password!");
+        } else if (error.code === "auth/email-already-in-use") {
+          Swal.fire(
+            "Duplicate Email",
+            `An account already exists with ${formData.email}!`,
+            "error"
+          );
+        } else {
+          setError(error.message);
+          Swal.fire("Something went wrong! Please try again!");
+        }
       });
   };
 

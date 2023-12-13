@@ -35,7 +35,8 @@ function Post({
             width={700}
             height={700}
             loading="lazy"
-            className="w-fit rounded"
+            className="w-full rounded"
+            alt="image"
           />
         ) : (
           ""
