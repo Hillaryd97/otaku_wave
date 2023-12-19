@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import WatchListItem from "./watchListItem";
 import { db } from "../firebase";
-import {
-  doc,
-  onSnapshot,
-} from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import Loading from "../ui/loading";
 import EditWatchListItemForm from "./editWatchListItemForm";
 import { useAppSelector } from "@/redux/store";
@@ -13,6 +10,7 @@ import {
   setActiveProfileItem,
   selectActiveProfileItem,
 } from "@/redux/features/profileNavSlice";
+import { useRouter } from "next/navigation";
 
 function WatchList() {
   const [userData, setUserData] = useState("");
@@ -20,42 +18,50 @@ function WatchList() {
   const [selectedItem, setSelectedItem] = useState(null);
   const dispatch = useDispatch();
   const activeProfileItem = useAppSelector(selectActiveProfileItem);
+  const router = useRouter();
 
-  useEffect(() => {
-    const userDataJSON = sessionStorage.getItem("userData");
-    const userData = JSON.parse(userDataJSON);
-    const authId = userData?.user.uid;
+useEffect(() => {
+  const userDataJSON = sessionStorage.getItem("userData");
+  const userData = JSON.parse(userDataJSON);
+  const authId = userData?.user?.uid; // Add a check for user
 
+  if (authId) {
     const userDocRef = doc(db, "users", authId);
 
-    // Subscribe to changes in the user document
     const unsubscribe = onSnapshot(
       userDocRef,
-      (doc) => {
-        if (doc.exists()) {
-          // Extract the user data from the document
-          const userData = doc.data();
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
           console.log("User data:", userData.watchlist);
-
-          // Set the user data in the component state
           setUserData(userData);
         } else {
           console.log("User document not found.");
-          // router.push("/login");
+          // Handle the case when the user document is not found
+          // e.g., redirect to login page or show a message to the user
+          router.push("/login");
         }
         setLoading(false);
       },
       (error) => {
         console.error("Error in onSnapshot:", error);
+        router.push("/login");
+        setLoading(false);
       }
     );
 
-    // Cleanup function to unsubscribe when the component is unmounted
     return () => {
       console.log("Unsubscribing from onSnapshot");
       unsubscribe();
     };
-  }, []);
+  } else {
+    // Handle the case when authId is null
+    router.push("/login");
+    console.error("Authentication ID not found.");
+    setLoading(false);
+  }
+}, []);
+
   const handleItemClick = (item) => {
     setSelectedItem(item);
   };
@@ -84,7 +90,7 @@ function WatchList() {
                   title={anime.title}
                   status={anime.status}
                   review={anime.thoughts}
-                  episodes={anime.episodes}
+                  episodes={anime.airingEpisode}
                   airingStatus={anime.airingStatus}
                 />
               </div>

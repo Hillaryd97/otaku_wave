@@ -60,33 +60,44 @@ function Profile() {
   useEffect(() => {
     const userDataJSON = sessionStorage.getItem("userData");
     const userData = JSON.parse(userDataJSON);
-    const authId = userData?.user.uid;
+    const authId = userData?.user?.uid; // Add a check for user
   
-    const userDocRef = doc(db, "users", authId);
+    if (authId) {
+      const userDocRef = doc(db, "users", authId);
   
-    // Subscribe to changes in the user document
-    const unsubscribe = onSnapshot(userDocRef, (doc) => {
-      if (doc.exists()) {
-        // Extract the user data from the document
-        const userData = doc.data();
-        console.log("User data:", userData);
+      // Subscribe to changes in the user document
+      const unsubscribe = onSnapshot(
+        userDocRef,
+        (doc) => {
+          if (doc.exists()) {
+            // Extract the user data from the document
+            const userData = doc.data();
+            console.log("User data:", userData);
   
-        // Set the user data in the component state
-        setUserData(userData);
-      } else {
-        console.log("User document not found.");
-        // router.push("/login");
-      }
+            // Set the user data in the component state
+            setUserData(userData);
+          } else {
+            console.log("User document not found.");
+            router.push("/login");
+          }
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error in onSnapshot:", error);
+        }
+      );
+  
+      // Cleanup function to unsubscribe when the component is unmounted
+      return () => {
+        console.log("Unsubscribing from onSnapshot");
+        unsubscribe();
+      };
+    } else {
+      // Handle the case when authId is undefined
+      console.error("Authentication ID not found.");
+      router.push("/login");
       setLoading(false);
-    }, (error) => {
-      console.error("Error in onSnapshot:", error);
-    });
-  
-    // Cleanup function to unsubscribe when the component is unmounted
-    return () => {
-      console.log("Unsubscribing from onSnapshot");
-      unsubscribe();
-    };
+    }
   }, []);
   
   return (

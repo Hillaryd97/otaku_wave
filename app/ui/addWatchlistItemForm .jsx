@@ -143,6 +143,7 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
           <option value="Watching">Watching</option>
           <option value="Completed">Completed</option>
           <option value="To Watch">To Watch</option>
+          <option value="Rewatching">Rewatching</option>
         </select>
       </div>
       <div className="mb-4">

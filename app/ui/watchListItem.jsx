@@ -15,8 +15,10 @@ function WatchListItem({
         return "bg-green-600";
       case "Watching":
         return "bg-purple-600";
+      case "Rewatching":
+        return "bg-yellow-600";
       case "To Watch":
-        return "bg-slate-600"; // Change this to your desired color for 'planToWatch'
+        return "bg-slate-600";
       default:
         return "bg-purple-600"; // Default color for 'Watching'
     }
@@ -29,7 +31,7 @@ function WatchListItem({
           src={imageSrc || "/hero-image (2).jpg"}
           width={500}
           height={500}
-          className="rounded- w-20 h-fit"
+          className="rounded-md w-20 h-fit"
           alt="Anime Poster"
         />
       </div>

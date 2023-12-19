@@ -80,7 +80,7 @@ function EditWatchListItemForm({ selectedItem, closeForm }) {
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-gray-400 bg-opacity-50 flex items-center justify-center">
-      <form className="fixed top-[20%] w-3/5  bg-gray-100 p-4 rounded-md shadow-md">
+      <form className="fixed top-[20%] w-4/5  md:w-3/5  bg-gray-100 p-4 rounded-md shadow-md">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold">{editedData.title}</h2>
           <button
@@ -102,6 +102,8 @@ function EditWatchListItemForm({ selectedItem, closeForm }) {
           <option value="Watching">Watching</option>
           <option value="Completed">Completed</option>
           <option value="To Watch">To Watch</option>
+          <option value="Rewatching">Rewatching</option>
+
         </select>
         <label className="block mb-2">Thoughts:</label>
         <div className="relative">
@@ -121,7 +123,7 @@ function EditWatchListItemForm({ selectedItem, closeForm }) {
             onClick={handleSubmit}
             className="bg-green-500 text-white px-4 py-2 rounded-md mr-2"
           >
-            Save Changes
+            Save
           </button>
 
           <button

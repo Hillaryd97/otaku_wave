@@ -25,7 +25,7 @@ function BottomNav() {
   };
 
   const pages = ["/home", "/topic", "/search", "/events", "/profile"];
-  const iconDescriptions = ["Home", "Topics", "Search", "Events", "Profile"];
+  const iconDescriptions = ["Home", "Topics", "Search", "Schedule", "Profile"];
   const router = useRouter();
 
   // useEffect(() => {
