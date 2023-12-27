@@ -82,7 +82,7 @@ function EditProfile({ setEditProfile }) {
 
     // Call the getUserProfileData function to initiate the data retrieval
     getUserProfileData();
-  }, []);
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -135,11 +135,10 @@ function EditProfile({ setEditProfile }) {
         alert("File is too heavy!");
 
         return;
-      }
-      else if (!allowedImageTypes.includes(file.type)) {
+      } else if (!allowedImageTypes.includes(file.type)) {
         //  Display an error message or take appropriate action
         console.error("Invalid file type. Please upload a valid image file.");
-        alert("Please upload an image!")
+        alert("Please upload an image!");
         return;
       }
 

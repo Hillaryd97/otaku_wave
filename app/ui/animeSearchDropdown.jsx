@@ -1,5 +1,6 @@
 // AnimeSearchDropdown.js
 
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 function AnimeSearchDropdown({ searchTerm, onSelect, searchType }) {
@@ -50,13 +51,13 @@ function AnimeSearchDropdown({ searchTerm, onSelect, searchType }) {
         <div className="absolute mt-2 overflow-y-scroll h-44 w-full bg-white border rounded-md shadow-md">
           {searchResults.length > 0 && searchTerm
             ? searchResults.map((anime) => (
-                <div>
+                <div key={anime.mal_id}>
                   <div
                     key={anime.mal_id}
                     className="p-2 cursor-pointer hover:bg-gray-100 flex "
                     onClick={() => handleItemClick(anime)}
                   >
-                    <img
+                    <Image
                       src={anime.images?.jpg?.large_image_url}
                       alt={anime.title}
                       className="w-10 h-14 object-cover rounded-md mr-2"

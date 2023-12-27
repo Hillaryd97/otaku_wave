@@ -19,6 +19,7 @@ import { db } from "../firebase";
 import { collection, query, where, getDocs, doc, onSnapshot } from "firebase/firestore";
 import Loading from "../ui/loading";
 import { useRouter } from "next/navigation";
+import { MdImageNotSupported } from "react-icons/md";
 
 function Profile() {
   const dispatch = useDispatch();
@@ -98,7 +99,7 @@ function Profile() {
       router.push("/login");
       setLoading(false);
     }
-  }, []);
+  },);
   
   return (
     <main className="bg-background flex flex-col h-fit w-full min-h-full justify-center pb-16 py-4 ">
@@ -110,7 +111,7 @@ function Profile() {
             <p className="text-lg font-semibold">
               {userData?.username || "No Username"}
             </p>
-            <img
+            <Image
               src={userData?.profilePic}
               width={500}
               height={500}

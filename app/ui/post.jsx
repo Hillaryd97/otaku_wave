@@ -14,10 +14,13 @@ function Post({
   return (
     <div className="bg-secondary h-fit p-3 text-left flex flex-col gap-2 shadow-md rounded mt-3">
       <div className="flex space-x-2 items-center ">
-        <img
-          src={profilePicture || "./bg-image (1).jpg"}
+        <Image
+          src={profilePicture || "/bg-image (1).jpg"}
           className="w-14 h-14 rounded-full"
           alt=""
+          width={500}
+          height={500}
+
         />
         <div>
           <p className="font-bold">{userName || "Hikariiii"}</p>

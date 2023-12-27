@@ -20,47 +20,47 @@ function WatchList() {
   const activeProfileItem = useAppSelector(selectActiveProfileItem);
   const router = useRouter();
 
-useEffect(() => {
-  const userDataJSON = sessionStorage.getItem("userData");
-  const userData = JSON.parse(userDataJSON);
-  const authId = userData?.user?.uid; // Add a check for user
+  useEffect(() => {
+    const userDataJSON = sessionStorage.getItem("userData");
+    const userData = JSON.parse(userDataJSON);
+    const authId = userData?.user?.uid; // Add a check for user
 
-  if (authId) {
-    const userDocRef = doc(db, "users", authId);
+    if (authId) {
+      const userDocRef = doc(db, "users", authId);
 
-    const unsubscribe = onSnapshot(
-      userDocRef,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const userData = docSnapshot.data();
-          console.log("User data:", userData.watchlist);
-          setUserData(userData);
-        } else {
-          console.log("User document not found.");
-          // Handle the case when the user document is not found
-          // e.g., redirect to login page or show a message to the user
+      const unsubscribe = onSnapshot(
+        userDocRef,
+        (docSnapshot) => {
+          if (docSnapshot.exists()) {
+            const userData = docSnapshot.data();
+            console.log("User data:", userData.watchlist);
+            setUserData(userData);
+          } else {
+            console.log("User document not found.");
+            // Handle the case when the user document is not found
+            // e.g., redirect to login page or show a message to the user
+            router.push("/login");
+          }
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error in onSnapshot:", error);
           router.push("/login");
+          setLoading(false);
         }
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Error in onSnapshot:", error);
-        router.push("/login");
-        setLoading(false);
-      }
-    );
+      );
 
-    return () => {
-      console.log("Unsubscribing from onSnapshot");
-      unsubscribe();
-    };
-  } else {
-    // Handle the case when authId is null
-    router.push("/login");
-    console.error("Authentication ID not found.");
-    setLoading(false);
-  }
-}, []);
+      return () => {
+        console.log("Unsubscribing from onSnapshot");
+        unsubscribe();
+      };
+    } else {
+      // Handle the case when authId is null
+      router.push("/login");
+      console.error("Authentication ID not found.");
+      setLoading(false);
+    }
+  });
 
   const handleItemClick = (item) => {
     setSelectedItem(item);

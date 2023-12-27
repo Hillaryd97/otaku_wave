@@ -27,7 +27,7 @@ function WatchListItem({
   return (
     <section className="flex w-full mb-2 ml-1 shadow-md bg-white rounded-md space-x-1.5">
       <div className="flex-shrink-0">
-        <img
+        <Image
           src={imageSrc || "/hero-image (2).jpg"}
           width={500}
           height={500}

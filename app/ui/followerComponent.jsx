@@ -10,6 +10,7 @@ function FollowerComponent({ imageSrc, name, status }) {
           width={500}
           height={500}
           className="rounded-full w-16 h-16"
+          alt={name}
         />
         <div>
           <h4 className="font-semibold">{name}</h4>

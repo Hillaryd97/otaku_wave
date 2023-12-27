@@ -9,6 +9,7 @@ import { logIn, logOut } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import Image from "next/image";
 
 export default function Register() {
   const dispatch = useDispatch();
@@ -19,8 +20,8 @@ export default function Register() {
     email: "",
     password: "",
   });
-  const userDataJSON = sessionStorage.getItem("userData");
-  const userData = JSON.parse(userDataJSON);
+  // const userDataJSON = sessionStorage.getItem("userData");
+  // const userData = JSON.parse(userDataJSON);
   const handleInputChange = (e, field) => {
     const updatedFormData = { ...formData };
     updatedFormData[field] = e.target.value;
@@ -54,11 +55,13 @@ export default function Register() {
 
   return (
     <div className=" min-h-screen px-4 bg-gray-950 bg-opacity-90 mx-auto flex flex-col items-center justify-center relative">
-      <img
+      <Image
         src="/login-img.png"
         alt="ichigo_final_getsuga_tenshou"
         className="absolute inset-0 w-full h-full object-cover"
         style={{ zIndex: -1 }}
+        width={600}
+        height={600}
       />
       <div className="flex flex-col items-center justify-center lg:w-2/6">
         <form

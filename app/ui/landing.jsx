@@ -33,13 +33,15 @@ export default function Landing() {
       <div className="relative w-full h-screen">
         <div className="relative w-full">
           {images.map((image, index) => (
-            <img
+            <Image
               key={index}
               src={image}
               alt={`Slide ${index + 1}`}
               className={`absolute w-full h-screen object-fill transition-opacity duration-1000 ${
                 index === currentImage ? "opacity-100" : "opacity-0"
               }`}
+              width={600}
+              height={600}
             />
           ))}
         </div>
@@ -84,7 +86,7 @@ export default function Landing() {
               <h2 className="font-bold">Showcase Your Anime Preferences</h2>
               <p className="">
                 Showcase your favorite anime series, characters, and episodes on
-                your profile. Add a cool avatar to let others know what you're
+                your profile. Add a cool avatar to let others know what you&apos;re
                 into.
               </p>
             </div>

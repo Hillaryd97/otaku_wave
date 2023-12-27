@@ -8,6 +8,7 @@ import { FaEye } from "react-icons/fa";
 import EditWatchListItemForm from "../ui/editWatchListItemForm";
 import AddWatchListItemForm from "../ui/addWatchlistItemForm ";
 import AddNewWatchlistItemEvent from "../ui/addNewWatchlistItemEvent";
+import Image from "next/image";
 function Events() {
   const [airingScheduleData, setAiringScheduleData] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -164,7 +165,7 @@ function Events() {
         console.error("Error fetching data:", error);
         // Handle error if needed
       });
-  }, []);
+  },);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -218,7 +219,7 @@ function Events() {
                       key={schedule.id}
                     >
                       <div className="w-2/5">
-                        <img
+                        <Image
                           width={500}
                           height={500}
                           className="rounded-md w-24 h-fit object-cover"

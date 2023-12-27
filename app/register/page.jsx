@@ -16,8 +16,8 @@ export default function Register() {
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const userDataJSON = sessionStorage.getItem("userData");
-  const userData = JSON.parse(userDataJSON);
+  // const userDataJSON = sessionStorage.getItem("userData");
+  // const userData = JSON.parse(userDataJSON);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -57,11 +57,13 @@ export default function Register() {
   };
   return (
     <div className="px-4 min-h-screen bg-gray-950 bg-opacity-90 mx-auto flex flex-col items-center justify-center relative">
-      <img
+      <Image
         src="/register-image.jpg"
         alt="ichigo_final_getsuga_tenshou"
         className="absolute inset-0 w-full h-full object-cover"
         style={{ zIndex: -1 }}
+        width={600}
+        height={600}
       />
       <div className="flex flex-col items-center justify-center lg:w-2/6">
         <form

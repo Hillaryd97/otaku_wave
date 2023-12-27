@@ -7,7 +7,7 @@ const NotFound = () => {
       Oops! Something went wrong
     </div>
     <p className="text-white text-lg mb-8">
-      We couldn't find the page you were looking for.
+      We could not find the page you were looking for.
     </p>
     <a
       href="/"
