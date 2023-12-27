@@ -34,7 +34,7 @@ export default function Register() {
       .then((userCredential) => {
         console.log(userCredential);
         sessionStorage.setItem("userData", JSON.stringify(userCredential));
-        router.push("/profile");
+        router.push("/home");
       })
       .catch((error) => {
         if (error.code === "auth/invalid-login-credentials") {
