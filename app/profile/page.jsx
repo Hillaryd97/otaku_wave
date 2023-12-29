@@ -135,7 +135,7 @@ function Profile() {
             {userData?.username || "No Username"}
           </p>
           <Image
-            src={userData?.profilePic}
+            src={userData?.profilePic || "/bg-image (4).jpg"}
             width={500}
             height={500}
             className="rounded-full w-32 h-32 "
