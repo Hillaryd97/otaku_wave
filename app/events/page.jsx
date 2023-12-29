@@ -21,9 +21,10 @@ function Events() {
   // useState(null);
 
   const currentTimestamp = Math.floor(Date.now() / 1000);
-  const currentMonthStart =
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime() /
-    1000;
+  // const currentMonthStart =
+  //   new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getTime() /
+  //   1000;
+
   const currentDate = new Date();
   const currentMonth = currentDate.toLocaleString("default", { month: "long" });
   const currentYear = currentDate.getFullYear();
@@ -68,7 +69,8 @@ function Events() {
     return isTruncated ? `${formattedDescription}` : formattedDescription;
   }
 
-  useEffect(() => {
+  const fetchData = async () => {
+    // Move the logic for fetching data here
     const storedData = localStorage.getItem("eventsData");
     const lastFetchTime = localStorage.getItem("lastEventsFetchTime");
 
@@ -84,7 +86,8 @@ function Events() {
         return;
       }
     }
-    // Define the GraphQL query
+
+    // Define the GraphQL query and other variables
     const query = `
     query {
       Page {
@@ -112,12 +115,10 @@ function Events() {
     
     `;
 
-    // Define the GraphQL variables (if needed)
     const variables = {
       // You can add variables here if necessary
     };
 
-    // Define the config for the API request
     const url = "https://graphql.anilist.co";
     const options = {
       method: "POST",
@@ -131,41 +132,127 @@ function Events() {
       }),
     };
 
-    fetch(url, options)
-      .then((response) => response.json())
-      .then((data) => {
-        // Sort anime schedules by popularity in ascending order
-        const sortedByPopularity = data?.data?.Page?.airingSchedules
-          .filter((schedule) => !schedule.media?.isAdult)
-          .sort((a, b) => b.media?.popularity - a.media?.popularity);
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
 
-        // Organize anime schedules by day
-        const groupedByDay = {};
-        sortedByPopularity.forEach((schedule) => {
-          const airingDate = new Date(schedule.airingAt * 1000);
-          const airingDay = airingDate.getDate();
+      // Sort anime schedules by popularity in ascending order
+      const sortedByPopularity = data?.data?.Page?.airingSchedules
+        .filter((schedule) => !schedule.media?.isAdult)
+        .sort((a, b) => b.media?.popularity - a.media?.popularity);
 
-          if (!groupedByDay[airingDay]) {
-            groupedByDay[airingDay] = [];
-          }
+      // Organize anime schedules by day
+      const groupedByDay = {};
+      sortedByPopularity.forEach((schedule) => {
+        const airingDate = new Date(schedule.airingAt * 1000);
+        const airingDay = airingDate.getDate();
 
-          groupedByDay[airingDay].push(schedule);
-        });
+        if (!groupedByDay[airingDay]) {
+          groupedByDay[airingDay] = [];
+        }
 
-        // Set the organized data to the state
-        localStorage.setItem("eventsData", JSON.stringify(groupedByDay));
-        const currentTime = new Date().getTime().toString();
-        localStorage.setItem("lastEventsFetchTime", currentTime);
-        setLastUpdated(
-          new Date(parseInt(currentTime, 10)).toLocaleTimeString()
-        );
-        setAiringScheduleData(groupedByDay);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        // Handle error if needed
+        groupedByDay[airingDay].push(schedule);
       });
-  },);
+
+      // Update the state and local storage
+      localStorage.setItem("eventsData", JSON.stringify(groupedByDay));
+      const currentTime = new Date().getTime().toString();
+      localStorage.setItem("lastEventsFetchTime", currentTime);
+      setLastUpdated(new Date(parseInt(currentTime, 10)).toLocaleTimeString());
+      setAiringScheduleData(groupedByDay);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Handle error if needed
+    }
+  };
+
+  useEffect(() => {
+    // Call the fetchData function here
+    fetchData();
+  }, []);
+  // useEffect(() => {
+  //   // Define the GraphQL query
+  //   const query = `
+  //   query {
+  //     Page {
+  //       airingSchedules(airingAt_greater: ${currentTimestamp}) {
+  //         id
+  //         media {
+  //           id
+  //           title {
+  //             romaji
+  //             english
+  //           }
+  //           description
+  //           coverImage {
+  //             medium
+  //           }
+  //           siteUrl
+  //           popularity
+  //           isAdult
+  //         }
+  //         episode
+  //         airingAt
+  //       }
+  //     }
+  //   }
+
+  //   `;
+
+  //   // Define the GraphQL variables (if needed)
+  //   const variables = {
+  //     // You can add variables here if necessary
+  //   };
+
+  //   // Define the config for the API request
+  //   const url = "https://graphql.anilist.co";
+  //   const options = {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Accept: "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       query: query,
+  //       variables: variables,
+  //     }),
+  //   };
+
+  //   fetch(url, options)
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       // Sort anime schedules by popularity in ascending order
+  //       const sortedByPopularity = data?.data?.Page?.airingSchedules
+  //         .filter((schedule) => !schedule.media?.isAdult)
+  //         .sort((a, b) => b.media?.popularity - a.media?.popularity);
+
+  //       // Organize anime schedules by day
+  //       const groupedByDay = {};
+  //       sortedByPopularity.forEach((schedule) => {
+  //         const airingDate = new Date(schedule.airingAt * 1000);
+  //         const airingDay = airingDate.getDate();
+
+  //         if (!groupedByDay[airingDay]) {
+  //           groupedByDay[airingDay] = [];
+  //         }
+
+  //         groupedByDay[airingDay].push(schedule);
+  //       });
+
+  //       // Set the organized data to the state
+  //       localStorage.setItem("eventsData", JSON.stringify(groupedByDay));
+  //       const currentTime = new Date().getTime().toString();
+  //       localStorage.setItem("lastEventsFetchTime", currentTime);
+  //       setLastUpdated(
+  //         new Date(parseInt(currentTime, 10)).toLocaleTimeString()
+  //       );
+  //       setAiringScheduleData(groupedByDay);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching data:", error);
+  //       // Handle error if needed
+  //     });
+  // });
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -196,103 +283,114 @@ function Events() {
           </div> */}
           {airingScheduleData ? (
             <div className="px-2 flex flex-col space-y-3 ">
-              {Object.keys(airingScheduleData).map((day) => (
-                <div key={day}>
-                  <h2 className="text-lg font-semibold py-2">
-                    {currentDate.getDate() === Number(day)
-                      ? "Today"
-                      : new Date(
-                          currentDate.getFullYear(),
-                          currentDate.getMonth(),
-                          Number(day)
-                        ).toLocaleDateString(undefined, {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                        })}
-                  </h2>
-                  {console.log(airingScheduleData)}
-                  {airingScheduleData[day].map((schedule) => (
-                    <div
-                      className="flex items-center
-                      mb-2 ml-1 shadow-md bg-white rounded-md space-x-1.5 flex-shrink-0"
-                      key={schedule.id}
-                    >
-                      <div className="w-2/5">
-                        <Image
-                          width={500}
-                          height={500}
-                          className="rounded-md w-24 h-fit object-cover"
-                          src={schedule.media?.coverImage?.medium}
-                          alt={
-                            schedule.media?.title?.romaji ||
-                            schedule.media?.title?.english
-                          }
-                        />
-                      </div>
-                      <div className="w-full py-0.5 flex flex-col space-y-1 md:space-y-1.5">
-                        <h3 className="font-semibold md:w-3/4">
-                          <span
-                            title={schedule.media.title.romaji}
-                            className="hover:text-gray-800 cursor-pointer"
-                          >
-                            {schedule.media?.title?.english && (
-                              <span>
-                                {schedule.media.title.english} (Ep{" "}
-                                {schedule.episode})
-                                <br />
-                                {/* <span className="text-gray-600 font-medium text-xs">
+              {Object.keys(airingScheduleData)
+                .sort((a, b) => {
+                  const dateA = new Date(
+                    airingScheduleData[a][0].airingAt * 1000
+                  );
+                  const dateB = new Date(
+                    airingScheduleData[b][0].airingAt * 1000
+                  );
+
+                  return dateA - dateB;
+                })
+                .map((day) => (
+                  <div key={day}>
+                    <h2 className="text-lg font-semibold py-2">
+                      {currentDate.getDate() === Number(day)
+                        ? "Today"
+                        : new Date(
+                            airingScheduleData[day][0].airingAt * 1000
+                          ).toLocaleDateString(undefined, {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                    </h2>
+
+                    {console.log(airingScheduleData)}
+                    {airingScheduleData[day].map((schedule) => (
+                      <div
+                        className="flex items-center
+          mb-2 ml-1 shadow-md bg-white rounded-md space-x-1.5 flex-shrink-0"
+                        key={schedule.id}
+                      >
+                        <div className="w-2/5">
+                          <Image
+                            width={500}
+                            height={500}
+                            className="rounded-md w-24 h-fit object-cover"
+                            src={schedule.media?.coverImage?.medium}
+                            alt={
+                              schedule.media?.title?.romaji ||
+                              schedule.media?.title?.english
+                            }
+                          />
+                        </div>
+                        <div className="w-full py-0.5 flex flex-col space-y-1 md:space-y-1.5">
+                          <h3 className="font-semibold md:w-3/4">
+                            <span
+                              title={schedule.media.title.romaji}
+                              className="hover:text-gray-800 cursor-pointer"
+                            >
+                              {schedule.media?.title?.english && (
+                                <span>
+                                  {schedule.media.title.english} (Ep{" "}
+                                  {schedule.episode})
+                                  <br />
+                                  {/* <span className="text-gray-600 font-medium text-xs">
                                   Other Names: {schedule.media.title.romaji}
                                 </span> */}
-                              </span>
-                            )}
-                            {!schedule.media?.title?.english && (
-                              <span>{schedule.media.title.romaji}</span>
-                            )}
-                          </span>
-                        </h3>
-                        {/* <p>Episode: <span className="font-semibold">{schedule.episode}</span></p> */}
-                        <p className="text-sm text-gray-800">
-                          Airing:{" "}
-                          <span className="font-semibold">
-                            {new Date(
-                              schedule.airingAt * 1000
-                            ).toLocaleTimeString([], {
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </p>
-                        <p className="text-xs text-red-500">
-                          {schedule.media.popularity.toLocaleString()} people
-                          are watching
-                        </p>
-                        {/* <p
+                                </span>
+                              )}
+                              {!schedule.media?.title?.english && (
+                                <span>{schedule.media.title.romaji}</span>
+                              )}
+                            </span>
+                          </h3>
+                          {/* <p>Episode: <span className="font-semibold">{schedule.episode}</span></p> */}
+                          <p className="text-sm text-gray-800">
+                            Airing:{" "}
+                            <span className="font-semibold">
+                              {new Date(
+                                schedule.airingAt * 1000
+                              ).toLocaleTimeString([], {
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </p>
+                          <p className="text-xs text-red-500">
+                            {schedule.media.popularity.toLocaleString()} people
+                            are watching
+                          </p>
+                          {/* <p
                         dangerouslySetInnerHTML={{
                           __html: truncateAndFormatDescription(
                             schedule.media?.description
                           ),
                         }}
                       ></p> */}
+                        </div>
+                        <div className="flex flex-col space-y-2 px-4 text-2xl text-white">
+                          <a
+                            href={schedule.media?.siteUrl}
+                            className="flex items-center p-1 rounded bg-red-600 hover:bg-gray-500 duration-300"
+                          >
+                            <FaEye size={24} />
+                          </a>
+                          <button
+                            onClick={() => handleItemClick(schedule)}
+                            className="flex items-center font-bold p-1 rounded bg-green-600 hover:bg-gray-500 duration-300"
+                          >
+                            <MdPlaylistAdd size={24} />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-col space-y-2 px-4 text-2xl text-white">
-                        <a
-                          href={schedule.media?.siteUrl}
-                          className="flex items-center p-1 rounded bg-red-600 hover:bg-gray-500 duration-300"
-                        >
-                          <FaEye size={24} />
-                        </a>
-                        <button
-                          onClick={() => handleItemClick(schedule)}
-                          className="flex items-center font-bold p-1 rounded bg-green-600 hover:bg-gray-500 duration-300"
-                        >
-                          <MdPlaylistAdd size={24} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
+                    ))}
+                  </div>
+                ))}
               <p className="text-center text-gray-600">
                 Last updated: {lastUpdated}
               </p>

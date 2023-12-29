@@ -27,6 +27,7 @@ function EditProfile({ setEditProfile }) {
     country: "",
     birthday: "",
     gender: "",
+    profilePic: "",
   });
 
   const handleChange = (e) => {
@@ -38,6 +39,8 @@ function EditProfile({ setEditProfile }) {
       [name]: truncatedValue,
     });
   };
+
+  console.log(formData);
 
   const Swal = require("sweetalert2");
 
@@ -100,6 +103,8 @@ function EditProfile({ setEditProfile }) {
       birthday:
         formData.birthday.length < 1 ? userData.birthday : formData.birthday,
       gender: formData.gender.length < 1 ? userData.gender : formData.gender,
+      profilePic:
+        formData.profilePic.length < 1 ? userData.profilePic : formData.profilePic,
     };
     try {
       setIsSubmitting(true);
@@ -126,7 +131,6 @@ function EditProfile({ setEditProfile }) {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     const storage = getStorage();
-
     if (file) {
       const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB as an example; adjust as needed
       if (file.size > maxSizeInBytes) {
@@ -143,6 +147,9 @@ function EditProfile({ setEditProfile }) {
       }
 
       try {
+        // const username = "your_username"; // replace with actual username
+        const userDocRef = doc(db, "users", username);
+
         // Upload the file to Firebase Storage
         const storageRef = ref(
           storage,
@@ -153,11 +160,19 @@ function EditProfile({ setEditProfile }) {
         // Get the download URL
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        // Update the user's document in Firestore with the download URL
-        const userDocRef = doc(db, "users", username);
-        await updateDoc(userDocRef, { profilePic: downloadURL });
+        // Check if the user document exists
+        const userDocSnapshot = await getDoc(userDocRef);
+
+        if (userDocSnapshot.exists()) {
+          // User document exists, update it
+          await updateDoc(userDocRef, { profilePic: downloadURL });
+        } else {
+          // User document doesn't exist, create it
+          await setDoc(userDocRef, { profilePic: downloadURL });
+        }
 
         // Optionally, update your local state or context with the new URL
+// handleChange()
         setFormData({ ...formData, profilePic: downloadURL });
       } catch (error) {
         console.error("Error uploading profile picture:", error);

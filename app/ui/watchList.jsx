@@ -33,13 +33,13 @@ function WatchList() {
         (docSnapshot) => {
           if (docSnapshot.exists()) {
             const userData = docSnapshot.data();
-            console.log("User data:", userData.watchlist);
+            // console.log("User data:", userData.watchlist);
             setUserData(userData);
           } else {
             console.log("User document not found.");
             // Handle the case when the user document is not found
             // e.g., redirect to login page or show a message to the user
-            router.push("/login");
+            // router.push("/login");
           }
           setLoading(false);
         },
@@ -51,7 +51,7 @@ function WatchList() {
       );
 
       return () => {
-        console.log("Unsubscribing from onSnapshot");
+        // console.log("Unsubscribing from onSnapshot");
         unsubscribe();
       };
     } else {

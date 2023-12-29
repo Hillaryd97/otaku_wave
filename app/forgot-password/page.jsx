@@ -9,12 +9,20 @@ import Link from "next/link";
 export default function ForgotPassword() {
   // Use state to store the user's email address
   const [email, setEmail] = useState("");
-
   // Define a function to reset the user's password
   const resetEmail = () => {
+    console.log("Reset email function called");
+    console.log("Email:", email);
     // Send a password reset email to the user
-    sendPasswordResetEmail(auth, email);
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        console.log("Password reset email sent successfully");
+      })
+      .catch((error) => {
+        console.error("Error sending password reset email:", error);
+      });
   };
+  
 
   // Return the component's UI
   return (
