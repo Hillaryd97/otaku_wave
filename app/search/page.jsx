@@ -24,9 +24,8 @@ function Search() {
   // const [searchResults, setSearchResults] = useState([]);
   const userDataJSON =
     typeof window !== "undefined" ? sessionStorage.getItem("userData") : null;
-
   const userSessionData = JSON.parse(userDataJSON);
-  const username = userSessionData.user.uid;
+  const username = userSessionData?.user?.uid;
   // const [isFollowing, setIsFollowing] = useState(false);
 
   const handleSearch = async (e) => {
@@ -141,8 +140,8 @@ function Search() {
             </button>
           </div>
           <div>
-            {searchResults.length > 0 ? (
-              searchResults.map((user) => (
+            {searchResults?.length > 0 ? (
+              searchResults?.map((user) => (
                 <FollowerComponent
                   key={user.authId}
                   imageSrc={user.profilePic}

@@ -63,10 +63,9 @@ function Profile() {
     () => {
       const userDataJSON =
         typeof window !== "undefined"
-          ? sessionStorage.getItem("userData")
+          ? sessionStorage?.getItem("userData")
           : null;
-
-      const userData = JSON.parse(userDataJSON);
+      const userData = userDataJSON ? JSON.parse(userDataJSON) : null;
       const authId = userData?.user?.uid; // Add a check for user
 
       if (authId) {
@@ -118,7 +117,7 @@ function Profile() {
   const signOut = async () => {
     try {
       await auth.signOut();
-      sessionStorage.removeItem("userData");
+      sessionStorage?.removeItem("userData");
       router.push("/");
 
       // You can add any additional logic you want after signing out

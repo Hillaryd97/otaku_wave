@@ -34,7 +34,7 @@ function Followers() {
           </Link>
         </div>
         <div className="flex flex-col space-y-2">
-          <FollowerComponent
+          {/* <FollowerComponent
             imageSrc={"/bg-image (1).jpg"}
             name="Hikariii"
             status="Gojo is alive"
@@ -43,7 +43,7 @@ function Followers() {
             imageSrc={"/bg-image (1).jpg"}
             name="Hikariii"
             status="Gojo is alive"
-          />
+          /> */}
         </div>
       </div>
 
