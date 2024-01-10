@@ -61,7 +61,11 @@ function Profile() {
 
   useEffect(
     () => {
-      const userDataJSON = sessionStorage.getItem("userData");
+      const userDataJSON =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("userData")
+          : null;
+
       const userData = JSON.parse(userDataJSON);
       const authId = userData?.user?.uid; // Add a check for user
 
@@ -150,7 +154,7 @@ function Profile() {
             />
             <div className="flex gap-5">
               <Link
-                href={"/followers"}
+                href={"/profile"}
                 className="bg-primary text-red-100 border-2 border-red-50 px-3 py-1.5 shadow-sm rounded-lg hover:bg-opacity-80 font-semibold"
               >
                 Friends

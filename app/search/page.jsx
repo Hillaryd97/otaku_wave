@@ -22,7 +22,9 @@ function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   // const [searchResults, setSearchResults] = useState([]);
-  const userDataJSON = sessionStorage.getItem("userData");
+  const userDataJSON =
+    typeof window !== "undefined" ? sessionStorage.getItem("userData") : null;
+
   const userSessionData = JSON.parse(userDataJSON);
   const username = userSessionData.user.uid;
   // const [isFollowing, setIsFollowing] = useState(false);
