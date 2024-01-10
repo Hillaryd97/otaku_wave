@@ -38,9 +38,9 @@ function UserProfile({ params }) {
   const userId = params.userId;
   console.log(userId);
   const [isFollowing, setIsFollowing] = useState(false);
-  const userDataJSON = sessionStorage.getItem("userData");
-  const userSessionData = JSON.parse(userDataJSON);
-  const username = userSessionData.user.uid;
+  const userDataJSON = typeof window !== 'undefined' ? sessionStorage.getItem("userData") : null;
+  const userSessionData = userDataJSON ? JSON.parse(userDataJSON) : null;
+  const username = userSessionData?.user?.uid || null;
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
