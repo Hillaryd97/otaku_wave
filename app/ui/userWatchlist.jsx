@@ -2,31 +2,14 @@ import React, { useEffect, useState } from "react";
 import WatchListItem from "./watchListItem";
 import { db } from "../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
-import Loading from "../ui/loading";
-import EditWatchListItemForm from "./editWatchListItemForm";
-import { useAppSelector } from "@/redux/store";
-import { useDispatch } from "react-redux";
-import {
-  setActiveProfileItem,
-  selectActiveProfileItem,
-} from "@/redux/features/profileNavSlice";
-import { useRouter } from "next/navigation";
 
-function WatchList() {
+function UserWatchList({ userId }) {
   const [userData, setUserData] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const dispatch = useDispatch();
-  const activeProfileItem = useAppSelector(selectActiveProfileItem);
-  const router = useRouter();
 
   useEffect(() => {
-    const userDataJSON = sessionStorage.getItem("userData");
-    const userData = JSON.parse(userDataJSON);
-    const authId = userData?.user?.uid; // Add a check for user
-
-    if (authId) {
-      const userDocRef = doc(db, "users", authId);
+    if (userId) {
+      const userDocRef = doc(db, "users", userId);
 
       const unsubscribe = onSnapshot(
         userDocRef,
@@ -62,9 +45,6 @@ function WatchList() {
     }
   });
 
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
-  };
   return (
     <div className="bg-gray-400 bg-opacity-20 pt-2 w-full min-h-[19rem] flex flex-col gap-2 overflow mr-6">
       {loading ? (
@@ -82,7 +62,6 @@ function WatchList() {
             .map((anime, index) => (
               <div
                 key={anime.malID}
-                onClick={() => handleItemClick(anime)} // Pass the clicked item to the handler
               >
                 <WatchListItem
                   key={anime.malID}
@@ -98,17 +77,11 @@ function WatchList() {
         </div>
       ) : (
         <div className="flex items-center justify-center h-32">
-          <p>You have not added any anime to your watchlist!</p>
+          <p>{userData.username || "They"} has not added any anime to your watchlist!</p>
         </div>
-      )}
-      {selectedItem && (
-        <EditWatchListItemForm
-          selectedItem={selectedItem}
-          closeForm={() => setSelectedItem(null)} // Close the form when needed
-        />
       )}
     </div>
   );
 }
 
-export default WatchList;
+export default UserWatchList;

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   addDoc,
   collection,
@@ -96,15 +95,24 @@ function EditProfile({ setEditProfile }) {
     const userInfo = {
       authId: username,
       username:
-        formData.username.length < 1 ? userData.username : formData.username,
-      bio: formData.bio.length < 1 ? userData.bio : formData.bio,
+        formData.username.length < 1
+          ? userData?.username || ""
+          : formData.username,
+      bio: formData.bio.length < 1 ? userData?.bio || "" : formData.bio,
       country:
-        formData.country.length < 1 ? userData.country : formData.country,
+        formData.country.length < 1
+          ? userData?.country || ""
+          : formData.country,
       birthday:
-        formData.birthday.length < 1 ? userData.birthday : formData.birthday,
-      gender: formData.gender.length < 1 ? userData.gender : formData.gender,
+        formData.birthday.length < 1
+          ? userData?.birthday || ""
+          : formData.birthday,
+      gender:
+        formData.gender.length < 1 ? userData?.gender || "" : formData.gender,
       profilePic:
-        formData.profilePic.length < 1 ? userData.profilePic : formData.profilePic,
+        formData.profilePic.length < 1
+          ? userData?.profilePic || ""
+          : formData.profilePic,
     };
     try {
       setIsSubmitting(true);
@@ -163,16 +171,16 @@ function EditProfile({ setEditProfile }) {
         // Check if the user document exists
         const userDocSnapshot = await getDoc(userDocRef);
 
-        if (userDocSnapshot.exists()) {
-          // User document exists, update it
-          await updateDoc(userDocRef, { profilePic: downloadURL });
-        } else {
-          // User document doesn't exist, create it
-          await setDoc(userDocRef, { profilePic: downloadURL });
-        }
+        // if (userDocSnapshot.exists()) {
+        //   // User document exists, update it
+        //   await updateDoc(userDocRef, { profilePic: downloadURL });
+        // } else {
+        //   // User document doesn't exist, create it
+        //   await setDoc(userDocRef, { profilePic: downloadURL });
+        // }
 
         // Optionally, update your local state or context with the new URL
-// handleChange()
+        // handleChange()
         setFormData({ ...formData, profilePic: downloadURL });
       } catch (error) {
         console.error("Error uploading profile picture:", error);
@@ -301,7 +309,12 @@ function EditProfile({ setEditProfile }) {
           </button>
           <button
             onClick={setEditProfile}
-            className="w-full duration-300 py-2 text-white bg-primary rounded-md hover:bg-opacity-80 focus:outline-none"
+            disabled={userData?.username === ""}
+            className={`w-full duration-300 py-2 text-white rounded-md focus:outline-none ${
+              userData?.username === ""
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-primary hover:bg-opacity-80"
+            }`}
           >
             Cancel
           </button>

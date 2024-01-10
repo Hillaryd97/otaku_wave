@@ -60,6 +60,8 @@ function AnimeSearchDropdown({ searchTerm, onSelect, searchType }) {
                     <Image
                       src={anime.images?.jpg?.large_image_url}
                       alt={anime.title}
+                      height={500}
+                      width={500}
                       className="w-10 h-14 object-cover rounded-md mr-2"
                     />
                     <div className="flex justify-center flex-col">
