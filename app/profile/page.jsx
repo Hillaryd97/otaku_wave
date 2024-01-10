@@ -63,7 +63,7 @@ function Profile() {
     () => {
       const userDataJSON =
         typeof window !== "undefined"
-          ? sessionStorage?.getItem("userData")
+          ? window.sessionStorage.getItem("userData")
           : null;
       const userData = userDataJSON ? JSON.parse(userDataJSON) : null;
       const authId = userData?.user?.uid; // Add a check for user

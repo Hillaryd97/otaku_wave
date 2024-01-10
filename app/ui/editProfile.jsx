@@ -43,9 +43,12 @@ function EditProfile({ setEditProfile }) {
 
   const Swal = require("sweetalert2");
 
-  const userDataJSON = sessionStorage.getItem("userData");
+  const userDataJSON =
+  typeof window !== "undefined"
+    ? window.sessionStorage.getItem("userData")
+    : null;
   const userSessionData = JSON.parse(userDataJSON);
-  const username = userSessionData.user.uid;
+  const username = userSessionData?.user.uid;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
