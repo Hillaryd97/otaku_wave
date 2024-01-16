@@ -61,10 +61,10 @@ function UserWatchList({ userId }) {
             .reverse()
             .map((anime, index) => (
               <div
-                // key={anime.malID}
+                key={anime.malID}
               >
                 <WatchListItem
-                  // key={anime.malID}
+                  key={anime.malID}
                   imageSrc={anime.image}
                   title={anime.title}
                   status={anime.status}

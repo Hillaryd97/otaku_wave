@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { AiFillHeart } from "react-icons/ai";
 import { FaCommentDots } from "react-icons/fa";
 
@@ -10,7 +10,31 @@ function Post({
   postData,
   postImage,
   timePosted,
+  likes,
+  comments,
+  onLike,
+  onComment,
+  allLikes = [],
 }) {
+  const [isLiked, setIsLiked] = useState(false);
+  const userDataJSON = sessionStorage.getItem("userData");
+  const userData = JSON.parse(userDataJSON);
+  const authId = userData?.user?.uid; // Add a check for user
+
+  const currentUserLiked = allLikes.some((like) => like.userId === authId);
+  const handleLike = () => {
+    // Toggle the like status
+    setIsLiked((prevIsLiked) => !prevIsLiked);
+
+    // Call the parent component's onLike function to update the likes
+    onLike();
+  };
+
+  const handleComment = () => {
+    // Call the parent component's onComment function to handle commenting
+    onComment();
+  };
+
   return (
     <div className="bg-secondary h-fit p-3 text-left flex flex-col gap-2 shadow-md rounded mt-3">
       <div className="flex space-x-2 items-center ">
@@ -20,18 +44,14 @@ function Post({
           alt=""
           width={500}
           height={500}
-
         />
         <div>
           <p className="font-bold">{userName || "No username"}</p>
-          <p className="text-gray-600 text-xs">
-            {userBio || "No bio yet"}
-          </p>
+          <p className="text-gray-600 text-xs">{userBio || "No bio yet"}</p>
         </div>
       </div>
       <div className="flex flex-col gap-2.5">
-        {postData ||
-          " "}
+        {postData || " "}
         {postImage ? (
           <Image
             src={postImage}
@@ -46,11 +66,20 @@ function Post({
         )}
       </div>
       <div className="text-gray-600 flex justify-between mt-2">
-        <div className="flex space-x-4">
-          <div className="text-gray-600 hover:text-primary duration-300">
+        <div className="flex items-center space-x-4">
+          <div
+            className={`flex items-center space-x-1 text-gray-600 hover:text-primary duration-300 cursor-pointer ${
+              currentUserLiked ? "text-primary" : ""
+            }`}
+            onClick={handleLike}
+          >
             <AiFillHeart size={20} />
+            <p>{likes}</p>
           </div>
-          <div className="text-gray-600 hover:text-gray-500 duration-300">
+          <div
+            className="text-gray-600 hover:text-gray-500 duration-300 cursor-pointer"
+            onClick={handleComment}
+          >
             <FaCommentDots size={20} />
           </div>
         </div>

@@ -11,6 +11,7 @@ import {
   selectActiveProfileItem,
 } from "@/redux/features/profileNavSlice";
 import { useRouter } from "next/navigation";
+import EditProfile from "./editProfile";
 
 function WatchList() {
   const [userData, setUserData] = useState("");
