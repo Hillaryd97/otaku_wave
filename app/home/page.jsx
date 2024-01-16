@@ -46,15 +46,6 @@ export default function Home() {
   };
   const handleLike = async (postId, userId, username) => {
     try {
-      // const userDataJSON = sessionStorage.getItem("userData");
-      // const userData = JSON.parse(userDataJSON);
-
-      // if (!userData || !userData.user) {
-      //   console.error("User data not available");
-      //   return;
-      // }
-
-      // const { userId, displayName: username } = userData.user;
 
       const postDocRef = doc(db, "posts", userId);
       const postDocSnapshot = await getDoc(postDocRef);
@@ -105,31 +96,38 @@ export default function Home() {
   // useEffect(() => {
   //   console.log(posts);
   // }, [posts]);
-
+  const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(date).toLocaleDateString(undefined, options);
+  };
+  
   const timeAgo = (timestamp) => {
     if (!timestamp || !timestamp.seconds) {
       return ""; // Handle the case when timestamp is undefined or seconds are missing
     }
+  
     const currentDate = new Date();
     const postDate = new Date(timestamp.seconds * 1000); // Convert seconds to milliseconds
-
     const timeDifference = currentDate - postDate;
-    const seconds = Math.floor(timeDifference / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-
-    if (seconds < 60) {
-      return `${seconds} ${seconds === 1 ? "second" : "seconds"} ago`;
-    } else if (minutes < 60) {
-      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-    } else if (hours < 24) {
-      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000));
+  
+    if (daysDifference > 1) {
+      return formatDate(postDate);
     } else {
-      // Customize this part for days, weeks, etc. if needed
-      return "more than a day ago";
+      const seconds = Math.floor(timeDifference / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+  
+      if (seconds < 60) {
+        return `${seconds} ${seconds === 1 ? "second" : "seconds"} ago`;
+      } else if (minutes < 60) {
+        return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+      } else {
+        return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+      }
     }
   };
-
+  
   // Example usage
   const timestamp = {
     seconds: 1704910063,
