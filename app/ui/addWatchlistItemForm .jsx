@@ -45,9 +45,23 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
       // Get the existing user document data
       const userDocSnapshot = await getDoc(userDocRef);
 
-      // If the user document exists, update the watchlist array
+      // If the user document exists, check if the anime is already in the watchlist
       if (userDocSnapshot.exists()) {
         const existingWatchlist = userDocSnapshot.data().watchlist || [];
+
+        // Check if anime with malID already exists in the watchlist
+        const isAnimeAlreadyInWatchlist = existingWatchlist.some(
+          (item) => item.malID === malID
+        );
+
+        if (isAnimeAlreadyInWatchlist) {
+          // Display an alert indicating that the anime is already in the watchlist
+          // alert("");
+          Swal.fire("This anime is already in your watchlist!");
+          return; // Exit the function to avoid further processing
+        }
+
+        // Anime is not in the watchlist, proceed to update the watchlist array
         const updatedWatchlist = [
           ...existingWatchlist,
           { malID, title, status, thoughts, image, episodes, airingStatus },
@@ -63,8 +77,6 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
           ],
         });
       }
-
-      // Swal.fire("Added!");
       console.log("Document updated/added for ID:", username);
 
       handleAddWatchlistItem();

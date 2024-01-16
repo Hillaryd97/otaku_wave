@@ -10,7 +10,13 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import Image from "next/image";
 
@@ -118,15 +124,20 @@ function NewPostModal({ addPostModal }) {
 
     // Extract the username from the user's document
     const userUsername = userDocSnapshot.data().username;
-
+    const userProfilePic = userDocSnapshot.data().profilePic;
+    const userBio = userDocSnapshot.data().bio;
     const postData = {
       authId: username,
       username: userUsername,
+      profilePic: userProfilePic,
+      bio: userBio,
       newPost: newPost.length < 1 ? newPost : newPost,
       postPic: postPic.length < 1 ? postPic : postPic,
+      comments: [],
+      likes: [],
       timestamp: serverTimestamp(),
     };
-    
+
     try {
       setIsSubmitting(true);
 

@@ -87,9 +87,9 @@ function Profile() {
               // User document not found, it's a new user
               // You can redirect to a different page or handle the creation of user data here
               console.log("User document not found.");
-
+              handleShowEditProfile()
               // Example: Redirect to a page where the user can create their data
-              // router.push("/create-user-data");
+              // router.push("/login");
             }
             setLoading(false);
           },
@@ -130,7 +130,7 @@ function Profile() {
     <main className="bg-background flex flex-col h-fit w-full min-h-full justify-center pb-16 py-4 ">
       {/* {loading && <Loading />} */}
 
-      {userData ? (
+      {/* {userData ? ( */}
         <div className="w-full ">
           <div className="flex justify-end items-center px-2">
             <button
@@ -252,10 +252,10 @@ function Profile() {
             />
           )}
         </div>
-      ) : (
+      {/* ) : (
         // User data not found, render EditProfile component
         <EditProfile setEditProfile={handleShowEditProfile} />
-      )}
+      )} */}
       <BottomNav />
     </main>
   );

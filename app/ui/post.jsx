@@ -23,7 +23,7 @@ function Post({
 
         />
         <div>
-          <p className="font-bold">{userName || "Hikariiii"}</p>
+          <p className="font-bold">{userName || "No username"}</p>
           <p className="text-gray-600 text-xs">
             {userBio || "No bio yet"}
           </p>
@@ -31,7 +31,7 @@ function Post({
       </div>
       <div className="flex flex-col gap-2.5">
         {postData ||
-          "Just finished reading the new JJK manga chapter...why is Gege so evil??"}
+          " "}
         {postImage ? (
           <Image
             src={postImage}
@@ -54,7 +54,7 @@ function Post({
             <FaCommentDots size={20} />
           </div>
         </div>
-        <div>{timePosted || "Just Now"}</div>
+        <div>{timePosted || ""}</div>
       </div>
     </div>
   );

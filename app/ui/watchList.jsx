@@ -18,7 +18,13 @@ function WatchList() {
   const [selectedItem, setSelectedItem] = useState(null);
   const dispatch = useDispatch();
   const activeProfileItem = useAppSelector(selectActiveProfileItem);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+
   const router = useRouter();
+
+  const handleShowEditProfile = () => {
+    setShowEditProfile(!showEditProfile);
+  };
 
   useEffect(() => {
     const userDataJSON = sessionStorage.getItem("userData");
@@ -37,6 +43,7 @@ function WatchList() {
             setUserData(userData);
           } else {
             console.log("User document not found.");
+            setShowEditProfile();
             // Handle the case when the user document is not found
             // e.g., redirect to login page or show a message to the user
             // router.push("/login");
@@ -56,8 +63,9 @@ function WatchList() {
       };
     } else {
       // Handle the case when authId is null
-      // router.push("/login");
+
       console.error("Authentication ID not found.");
+      router.push("/login");
       setLoading(false);
     }
   });
@@ -100,6 +108,9 @@ function WatchList() {
         <div className="flex items-center justify-center h-32">
           <p>You have not added any anime to your watchlist!</p>
         </div>
+      )}
+      {showEditProfile && (
+        <EditProfile setEditProfile={handleShowEditProfile} />
       )}
       {selectedItem && (
         <EditWatchListItemForm
