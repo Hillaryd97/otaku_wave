@@ -44,9 +44,18 @@ export default function Home() {
       // Handle error, show a message, etc.
     }
   };
-  
   const handleLike = async (postId, userId, username) => {
     try {
+      // const userDataJSON = sessionStorage.getItem("userData");
+      // const userData = JSON.parse(userDataJSON);
+
+      // if (!userData || !userData.user) {
+      //   console.error("User data not available");
+      //   return;
+      // }
+
+      // const { userId, displayName: username } = userData.user;
+
       const postDocRef = doc(db, "posts", userId);
       const postDocSnapshot = await getDoc(postDocRef);
 
@@ -55,14 +64,16 @@ export default function Home() {
         const postData = postDocSnapshot.data();
 
         // Check if the user has already liked the post
-        const hasLiked = postData[postId].likes.includes(userId);
+        const hasLiked = postData[postId]?.likes?.some(
+          (like) => like.userId === userId
+        );
 
         // Toggle the like status
         if (hasLiked) {
           // Remove the user from the likes array
           await updateDoc(postDocRef, {
             [`${postId}.likes`]: postData[postId].likes.filter(
-              (like) => like !== userId
+              (like) => like.userId !== userId
             ),
           });
         } else {
