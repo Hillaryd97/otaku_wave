@@ -1,10 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState } from "react";
 import { AiFillHeart } from "react-icons/ai";
 import { FaCommentDots } from "react-icons/fa";
 
 function Post({
   profilePicture,
+  userAuthId,
   userName,
   userBio,
   postData,
@@ -38,15 +40,24 @@ function Post({
   return (
     <div className="bg-secondary h-fit p-3 text-left flex flex-col gap-2 shadow-md rounded mt-3">
       <div className="flex space-x-2 items-center ">
-        <Image
-          src={profilePicture || "/bg-image (1).jpg"}
-          className="w-14 h-14 rounded-full"
-          alt=""
-          width={500}
-          height={500}
-        />
+        <Link href={`/${userAuthId}`}>
+          {" "}
+          <Image
+            src={profilePicture || "/bg-image (1).jpg"}
+            className="w-14 h-14 rounded-full"
+            alt=""
+            width={500}
+            height={500}
+          />
+        </Link>
         <div>
-          <p className="font-bold">{userName || "No username"}</p>
+          {/* <p></p> */}
+          <Link
+            href={`/${userAuthId}`}
+            className="font-bold hover:text-primary"
+          >
+            {userName || "No username"}
+          </Link>
           <p className="text-gray-600 text-xs">{userBio || "No bio yet"}</p>
         </div>
       </div>

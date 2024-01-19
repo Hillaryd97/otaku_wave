@@ -21,6 +21,7 @@ export default function Home() {
   const [addPostModal, showAddPostModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
+  const router = useRouter(); // Add useRouter hook
 
   const fetchPosts = () => {
     try {
@@ -46,7 +47,6 @@ export default function Home() {
   };
   const handleLike = async (postId, userId, username) => {
     try {
-
       const postDocRef = doc(db, "posts", userId);
       const postDocSnapshot = await getDoc(postDocRef);
 
@@ -89,35 +89,43 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = fetchPosts();
 
+    // Check if the user is logged in, else redirect to login page
+    const userDataJSON = sessionStorage.getItem("userData");
+    const userSessionData = JSON.parse(userDataJSON);
+    if (!userSessionData || !userSessionData.user) {
+      router.push("/login");
+    }
+
     // Cleanup function to unsubscribe when the component unmounts
     return () => unsubscribe();
-  });
+  }, [router]);
+
 
   // useEffect(() => {
   //   console.log(posts);
   // }, [posts]);
   const formatDate = (date) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(date).toLocaleDateString(undefined, options);
   };
-  
+
   const timeAgo = (timestamp) => {
     if (!timestamp || !timestamp.seconds) {
       return ""; // Handle the case when timestamp is undefined or seconds are missing
     }
-  
+
     const currentDate = new Date();
     const postDate = new Date(timestamp.seconds * 1000); // Convert seconds to milliseconds
     const timeDifference = currentDate - postDate;
     const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000));
-  
+
     if (daysDifference > 1) {
       return formatDate(postDate);
     } else {
       const seconds = Math.floor(timeDifference / 1000);
       const minutes = Math.floor(seconds / 60);
       const hours = Math.floor(minutes / 60);
-  
+
       if (seconds < 60) {
         return `${seconds} ${seconds === 1 ? "second" : "seconds"} ago`;
       } else if (minutes < 60) {
@@ -127,7 +135,7 @@ export default function Home() {
       }
     }
   };
-  
+
   // Example usage
   const timestamp = {
     seconds: 1704910063,
@@ -142,39 +150,34 @@ export default function Home() {
       <div className="container mx-auto pt-2 px-2 mt-10">
         <div>
           {loading ? (
-            // Display a loading indicator while posts are being fetched
-            // <p>Loading...</p>
             <Loading />
           ) : (
-            posts.map((userPosts, index) => (
-              <div key={index}>
-                {posts
-                  .flatMap((userPosts) => Object.values(userPosts))
-                  .filter((post) => post.newPost && post.timestamp)
-                  .sort(
-                    (a, b) =>
-                      (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)
-                  )
-                  .map((post, index) => (
-                    <Post
-                      key={index}
-                      profilePicture={post.profilePic}
-                      userName={post.username}
-                      userBio={post.bio}
-                      postData={post.newPost}
-                      postImage={post.postPic}
-                      timePosted={timeAgo(post.timestamp)}
-                      likes={post.likes ? post.likes.length : 0}
-                      allLikes={post.likes}
-                      // comments={post.comments}
-                      onLike={() =>
-                        handleLike(post.postId, post.authId, post.username)
-                      }
-                      onComment={() => handleComment(post.postId)}
-                    />
-                  ))}
-              </div>
-            ))
+            posts
+              .flatMap((userPosts) => Object.values(userPosts))
+              .filter((post) => post.newPost && post.timestamp)
+              .sort(
+                (a, b) =>
+                  (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)
+              )
+              .map((post, index) => (
+                <Post
+                  key={post.postId}
+                  userAuthId={post.authId}
+                  profilePicture={post.profilePic}
+                  userName={post.username}
+                  userBio={post.bio}
+                  postData={post.newPost}
+                  postImage={post.postPic}
+                  timePosted={timeAgo(post.timestamp)}
+                  likes={post.likes ? post.likes.length : 0}
+                  allLikes={post.likes}
+                  // comments={post.comments}
+                  onLike={() =>
+                    handleLike(post.postId, post.authId, post.username)
+                  }
+                  onComment={() => handleComment(post.postId)}
+                />
+              ))
           )}
         </div>
       </div>

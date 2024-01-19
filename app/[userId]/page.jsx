@@ -38,7 +38,8 @@ function UserProfile({ params }) {
   const userId = params.userId;
   console.log(userId);
   const [isFollowing, setIsFollowing] = useState(false);
-  const userDataJSON = typeof window !== 'undefined' ? sessionStorage.getItem("userData") : null;
+  const userDataJSON =
+    typeof window !== "undefined" ? sessionStorage.getItem("userData") : null;
   const userSessionData = userDataJSON ? JSON.parse(userDataJSON) : null;
   const username = userSessionData?.user?.uid || null;
   const [userData, setUserData] = useState(null);
@@ -95,27 +96,45 @@ function UserProfile({ params }) {
       const clickedUserRef = doc(db, "users", userId);
       const authUserRef = doc(db, "users", username);
 
-      console.log("Clicked User Ref:", clickedUserRef.path);
-      console.log("Auth User Ref:", authUserRef.path);
-
       // Fetch data for the clicked user
       const clickedUserData = (await getDoc(clickedUserRef)).data();
+      const authUserData = (await getDoc(authUserRef)).data();
 
       if (isFollowing) {
         // If already following, unfollow by removing from arrays
         await updateDoc(clickedUserRef, {
-          followers: arrayRemove(username),
+          followers: arrayRemove({
+            uid: username,
+            username: authUserData.username,
+            profilePic: authUserData.profilePic,
+            bio: authUserData.bio,
+          }),
         });
         await updateDoc(authUserRef, {
-          following: arrayRemove(userId),
+          following: arrayRemove({
+            uid: userId,
+            username: clickedUserData.username,
+            profilePic: clickedUserData.profilePic,
+            bio: clickedUserData.bio,
+          }),
         });
       } else {
         // If not following, follow by adding to arrays
         await updateDoc(clickedUserRef, {
-          followers: arrayUnion(username),
+          followers: arrayUnion({
+            uid: username,
+            username: authUserData.username,
+            profilePic: authUserData.profilePic,
+            bio: authUserData.bio,
+          }),
         });
         await updateDoc(authUserRef, {
-          following: arrayUnion(userId),
+          following: arrayUnion({
+            uid: userId,
+            username: clickedUserData.username,
+            profilePic: clickedUserData.profilePic,
+            bio: clickedUserData.bio,
+          }),
         });
       }
 
@@ -125,6 +144,7 @@ function UserProfile({ params }) {
       console.error("Error updating followers/following:", error);
     }
   };
+
   const handleGoBack = () => {
     router.back();
   };
@@ -151,27 +171,30 @@ function UserProfile({ params }) {
           <div className="flex gap-5">
             <Link
               href={"/followers"}
-              className="bg-primary font-bold text-white border  px-3 py-0.5 shadow-sm rounded-lg hover:bg-opacity-80 "
+              className="bg-primary font-bold text-white border px-3 py-0.5 shadow-sm rounded-lg hover:bg-opacity-80"
             >
               Friends
             </Link>
-            {userId === username ? (
-              ""
-            ) : (
+            {userId !== username && (
               <button
-                onClick={() => handleFollow()}
+                onClick={handleFollow}
                 className={`border ${
-                  userData?.followers?.includes(username)
-                    ? "border-red-400"
-                    : "border-red-400"
-                } text-red-500 font-bold px-3 border py-0.5 shadow hover:bg-red-400 rounded-lg hover:text-white duration-300`}
+                  userData?.followers?.some(
+                    (follower) => follower.uid === username
+                  )
+                    ? "border-red-400 text-red-500 hover:bg-red-400 hover:text-white"
+                    : "border-red-400 text-red-500 hover:bg-red-400 hover:text-white"
+                } font-bold px-3 border py-0.5 shadow duration-300 rounded-lg`}
               >
-                {userData?.followers?.includes(username)
-                  ? "Unfollow"
-                  : "Follow"}
+                {userData?.followers?.some(
+                  (follower) => follower.uid === username
+                )
+                  ? "Follow"
+                  : "Unfollow"}
               </button>
             )}
           </div>
+
           <div className="px-4 text-center">
             <p>{userData?.bio || "No Bio"}</p>
           </div>
@@ -220,10 +243,15 @@ const checkIfUserIsFollowing = async (authUserId, targetUserId) => {
   try {
     const targetUserRef = doc(db, "users", targetUserId);
     const targetUserData = (await getDoc(targetUserRef)).data();
-    const isFollowing = targetUserData.followers
-      ? targetUserData.followers.includes(authUserId)
-      : false;
-    return isFollowing;
+
+    if (targetUserData && targetUserData.followers) {
+      // Check if the array includes an object with the auth user's details
+      return targetUserData.followers.some(
+        (follower) => follower.uid === authUserId
+      );
+    }
+
+    return false;
   } catch (error) {
     console.error("Error checking if user is following:", error);
     return false;
