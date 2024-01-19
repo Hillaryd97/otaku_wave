@@ -16,6 +16,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import Loading from "../ui/loading";
+import Image from "next/image";
 
 export default function Home() {
   const [addPostModal, showAddPostModal] = useState(false);
@@ -100,7 +101,6 @@ export default function Home() {
     return () => unsubscribe();
   }, [router]);
 
-
   // useEffect(() => {
   //   console.log(posts);
   // }, [posts]);
@@ -151,6 +151,17 @@ export default function Home() {
         <div>
           {loading ? (
             <Loading />
+          ) : posts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-96">
+              <Image
+                width={500}
+                height={500}
+                alt="No Posts"
+                src={"/empty.svg"}
+                className="h-56 w-56"
+              />
+              <p>No posts to display</p>
+            </div>
           ) : (
             posts
               .flatMap((userPosts) => Object.values(userPosts))
@@ -171,7 +182,6 @@ export default function Home() {
                   timePosted={timeAgo(post.timestamp)}
                   likes={post.likes ? post.likes.length : 0}
                   allLikes={post.likes}
-                  // comments={post.comments}
                   onLike={() =>
                     handleLike(post.postId, post.authId, post.username)
                   }

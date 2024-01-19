@@ -152,7 +152,8 @@ function Profile() {
               href={"/followers"}
               className="bg-primary text-red-100 border-2 border-red-50 px-3 py-1.5 shadow-sm rounded-lg hover:bg-opacity-80 font-semibold"
             >
-              Friends ({userData?.followers?.length})
+              Friends 
+              {/* ({userData?.followers?.length}) */}
             </Link>
             <button
               onClick={setShowEditProfile}

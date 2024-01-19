@@ -24,6 +24,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import UserWatchList from "../ui/userWatchlist";
+import AllClickedUsersPost from "../ui/allClickedUsersPost";
 
 function UserProfile({ params }) {
   const dispatch = useDispatch();
@@ -101,22 +102,27 @@ function UserProfile({ params }) {
       const authUserData = (await getDoc(authUserRef)).data();
 
       if (isFollowing) {
+        const authUserFollowingData = {
+          uid: userId,
+          username: clickedUserData.username,
+          profilePic: clickedUserData.profilePic,
+          bio: clickedUserData.bio,
+        };
+
+        const clickedUserFollowerData = {
+          uid: username,
+          username: authUserData.username,
+          profilePic: authUserData.profilePic,
+          bio: authUserData.bio,
+        };
+
         // If already following, unfollow by removing from arrays
         await updateDoc(clickedUserRef, {
-          followers: arrayRemove({
-            uid: username,
-            username: authUserData.username,
-            profilePic: authUserData.profilePic,
-            bio: authUserData.bio,
-          }),
+          followers: arrayRemove(authUserFollowingData),
         });
+
         await updateDoc(authUserRef, {
-          following: arrayRemove({
-            uid: userId,
-            username: clickedUserData.username,
-            profilePic: clickedUserData.profilePic,
-            bio: clickedUserData.bio,
-          }),
+          following: arrayRemove(clickedUserFollowerData),
         });
       } else {
         // If not following, follow by adding to arrays
@@ -169,12 +175,12 @@ function UserProfile({ params }) {
             alt="image"
           />
           <div className="flex gap-5">
-            <Link
+            {/* <Link
               href={"/followers"}
               className="bg-primary font-bold text-white border px-3 py-0.5 shadow-sm rounded-lg hover:bg-opacity-80"
             >
               Friends
-            </Link>
+            </Link> */}
             {userId !== username && (
               <button
                 onClick={handleFollow}
@@ -189,8 +195,8 @@ function UserProfile({ params }) {
                 {userData?.followers?.some(
                   (follower) => follower.uid === username
                 )
-                  ? "Follow"
-                  : "Unfollow"}
+                  ? "Unfollow"
+                  : "Follow"}
               </button>
             )}
           </div>
@@ -228,7 +234,7 @@ function UserProfile({ params }) {
             {activeProfileItem === "watchList" ? (
               <UserWatchList userId={userId} />
             ) : (
-              <AllPosts />
+              <AllClickedUsersPost userId={userId} />
             )}
           </div>
         </div>

@@ -5,27 +5,21 @@ import { db } from "../firebase"; // Import your Firebase configuration
 import Loading from "./loading";
 import Image from "next/image";
 
-function AllPosts() {
+function AllClickedUsersPost({ userId }) {
   const [loading, setLoading] = useState(true);
   const [userPosts, setUserPosts] = useState([]);
-  const userDataJSON =
-    typeof window !== "undefined"
-      ? window.sessionStorage.getItem("userData")
-      : null;
-  const userData = userDataJSON ? JSON.parse(userDataJSON) : null;
-  const authId = userData?.user?.uid; // Add a check for user
 
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
         const postsCollectionRef = collection(db, "posts");
 
-        // Directly using the document ID as the authId
+        // Directly using the document ID as the userId
         const postsSnapshot = await getDocs(postsCollectionRef);
 
         if (!postsSnapshot.empty) {
           const postsData = postsSnapshot.docs
-            .filter((doc) => doc.id === authId)
+            .filter((doc) => doc.id === userId)
             .map((doc) => ({
               postId: doc.id,
               ...doc.data(),
@@ -35,7 +29,7 @@ function AllPosts() {
           setLoading(false);
           console.log(postsData);
         } else {
-          console.log("No posts found for user with ID:", authId);
+          console.log("No posts found for user with ID:", userId);
         }
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -44,7 +38,7 @@ function AllPosts() {
     };
 
     fetchUserPosts();
-  }, [authId]);
+  }, [userId]);
 
   const formatDate = (date) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -105,7 +99,7 @@ function AllPosts() {
             .map((post, index) => (
               <Post
                 key={post.postId}
-                userAuthId={post.authId}
+                useruserId={post.userId}
                 profilePicture={post.profilePic}
                 userName={post.username}
                 userBio={post.bio}
@@ -114,10 +108,6 @@ function AllPosts() {
                 timePosted={timeAgo(post.timestamp)}
                 likes={post.likes ? post.likes.length : 0}
                 allLikes={post.likes}
-                // onLike={() =>
-                //   handleLike(post.postId, post.authId, post.username)
-                // }
-                // onComment={() => handleComment(post.postId)}
               />
             ))
         )}
@@ -126,4 +116,4 @@ function AllPosts() {
   );
 }
 
-export default AllPosts;
+export default AllClickedUsersPost;

@@ -12,6 +12,7 @@ import {
 } from "@/redux/features/profileNavSlice";
 import { useRouter } from "next/navigation";
 import EditProfile from "./editProfile";
+import Image from "next/image";
 
 function WatchList() {
   const [userData, setUserData] = useState("");
@@ -106,7 +107,14 @@ function WatchList() {
             ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-32">
+        <div className="flex flex-col items-center justify-center h-[20rem]">
+          <Image
+            width={500}
+            height={500}
+            alt="No Posts"
+            src={"/addNew.svg"}
+            className="h-56 w-56"
+          />
           <p>You have not added any anime to your watchlist!</p>
         </div>
       )}

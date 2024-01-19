@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import WatchListItem from "./watchListItem";
 import { db } from "../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
+import Image from "next/image";
 
 function UserWatchList({ userId }) {
   const [userData, setUserData] = useState("");
@@ -60,9 +61,7 @@ function UserWatchList({ userId }) {
             .slice() // Create a shallow copy to avoid modifying the original array
             .reverse()
             .map((anime, index) => (
-              <div
-                key={anime.malID}
-              >
+              <div key={anime.malID}>
                 <WatchListItem
                   key={anime.malID}
                   imageSrc={anime.image}
@@ -76,8 +75,18 @@ function UserWatchList({ userId }) {
             ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-32">
-          <p>{userData.username || "They"} has not added any anime to your watchlist!</p>
+        <div className="flex flex-col items-center justify-center h-[20rem]">
+          <Image
+            width={500}
+            height={500}
+            alt="No Posts"
+            src={"/addNew.svg"}
+            className="h-56 w-56"
+          />
+          <p>
+            {userData.username || "They"} has not added any anime to their
+            watchlist!
+          </p>
         </div>
       )}
     </div>
