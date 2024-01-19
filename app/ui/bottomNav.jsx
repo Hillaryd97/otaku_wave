@@ -28,11 +28,11 @@ function BottomNav() {
   const iconDescriptions = ["Home", "Topics", "Search", "Schedule", "Profile"];
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (activeItem === "/home") {
-  //     router.push("/home");
-  //   }
-  // }, [activeItem, router]);
+  useEffect(() => {
+    if (activeItem === "/home") {
+      router.push("/home");
+    }
+  }, [activeItem, router]);
 
   return (
     <nav className="fixed w-full bottom-0 pt-2.5 px-4 pb-5 bg-opacity-80 bg-background shadow-md border-t-2 border-secondary">
