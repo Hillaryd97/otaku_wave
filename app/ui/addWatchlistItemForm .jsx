@@ -19,7 +19,7 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [manualStarRating, setManualStarRating] = useState(0);
-   const [shouldCreatePost, setShouldCreatePost] = useState(true); // TRUE by default
+  const [shouldCreatePost, setShouldCreatePost] = useState(true); // TRUE by default
 
   const userDataJSON = sessionStorage.getItem("userData");
   const userSessionData = JSON.parse(userDataJSON);
@@ -29,14 +29,14 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
   // Auto-detect rating from review text
   const parseReviewRating = (reviewText) => {
     if (!reviewText) return 0;
-    
+
     const patterns = [
-      /\((\d+(?:\.\d+)?)\/10\)/,      // (8.5/10)
+      /\((\d+(?:\.\d+)?)\/10\)/, // (8.5/10)
       /\((\d+(?:\.\d+)?)\s*\/\s*10\)/, // (8.5 / 10)
-      /(\d+(?:\.\d+)?)\/10/,          // 8.5/10
-      /\((\d+(?:\.\d+)?)\)/,          // (8.5) - assuming out of 10
+      /(\d+(?:\.\d+)?)\/10/, // 8.5/10
+      /\((\d+(?:\.\d+)?)\)/, // (8.5) - assuming out of 10
     ];
-    
+
     for (const pattern of patterns) {
       const match = reviewText.match(pattern);
       if (match) {
@@ -46,10 +46,10 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
         return Math.round(rating / 2);
       }
     }
-    
+
     const negativeMatch = reviewText.match(/-(\d+)\/10/);
     if (negativeMatch) return 0;
-    
+
     return 0;
   };
 
@@ -62,7 +62,7 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const truncatedValue = value.slice(0, 250);
-    
+
     if (name === "thoughts") {
       setThoughts(truncatedValue);
     } else if (name === "title") {
@@ -80,8 +80,9 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
 
   const renderStars = () => {
     const effectiveRating = getEffectiveRating();
-    const isAutoDetected = manualStarRating === 0 && parseReviewRating(thoughts) > 0;
-    
+    const isAutoDetected =
+      manualStarRating === 0 && parseReviewRating(thoughts) > 0;
+
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       const isActive = i <= (hoveredRating || effectiveRating);
@@ -91,7 +92,7 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
           size={24}
           className={`cursor-pointer transition-colors ${
             isActive
-              ? isAutoDetected 
+              ? isAutoDetected
                 ? "fill-yellow-300 text-yellow-400 opacity-80"
                 : "fill-yellow-400 text-yellow-400"
               : "text-gray-300 hover:text-yellow-200"
@@ -106,189 +107,199 @@ function AddWatchListItemForm({ onSubmit, handleAddWatchlistItem }) {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (isSubmitting) return;
+    e.preventDefault();
+    if (isSubmitting) return;
 
-  try {
-    setIsSubmitting(true);
+    try {
+      setIsSubmitting(true);
 
-    const userDocRef = doc(db, "users", username);
-    const userDocSnapshot = await getDoc(userDocRef);
+      const userDocRef = doc(db, "users", username);
+      const userDocSnapshot = await getDoc(userDocRef);
 
-    if (userDocSnapshot.exists()) {
-      const existingWatchlist = userDocSnapshot.data().watchlist || [];
+      if (userDocSnapshot.exists()) {
+        const existingWatchlist = userDocSnapshot.data().watchlist || [];
 
-      // Check if anime already exists (for profile modal)
-      const isAnimeAlreadyInWatchlist = existingWatchlist.some(
-        (item) => item.malID === malID
-      );
+        // Check if anime already exists (for profile modal)
+        const isAnimeAlreadyInWatchlist = existingWatchlist.some(
+          (item) => item.malID === malID
+        );
 
-      if (isAnimeAlreadyInWatchlist) {
-        Swal.fire("This anime is already in your watchlist!");
-        return;
+        if (isAnimeAlreadyInWatchlist) {
+          Swal.fire("This anime is already in your watchlist!");
+          return;
+        }
+
+        const finalRating = getEffectiveRating();
+
+        // Add to watchlist
+        const newWatchlistItem = {
+          malID,
+          title,
+          status,
+          thoughts,
+          image,
+          episodes,
+          airingEpisode,
+          airingStatus,
+          rating: finalRating,
+          dateAdded: new Date().toISOString(),
+          isNewAddition: true, // Flag for new additions
+        };
+
+        const updatedWatchlist = [...existingWatchlist, newWatchlistItem];
+        await updateDoc(userDocRef, { watchlist: updatedWatchlist });
+
+        // 🚀 AUTO-POST FOR NEW ADDITIONS (only if user wants to post)
+        if (shouldCreatePost) {
+          // This comes from the toggle
+          await createWatchlistPost(
+            newWatchlistItem,
+            userDocSnapshot.data(),
+            "added"
+          );
+        }
+
+        updateLastActive(username);
       }
 
-      const finalRating = getEffectiveRating();
-
-      // Add to watchlist
-      const newWatchlistItem = {
-        malID,
-        title,
-        status,
-        thoughts,
-        image,
-        episodes,
-        airingEpisode,
-        airingStatus,
-        rating: finalRating,
-        dateAdded: new Date().toISOString(),
-        isNewAddition: true // Flag for new additions
-      };
-
-      const updatedWatchlist = [...existingWatchlist, newWatchlistItem];
-      await updateDoc(userDocRef, { watchlist: updatedWatchlist });
-
-      // 🚀 AUTO-POST FOR NEW ADDITIONS (only if user wants to post)
-      if (shouldCreatePost) { // This comes from the toggle
-        await createWatchlistPost(newWatchlistItem, userDocSnapshot.data(), 'added');
-      }
-
-      updateLastActive(username);
-    }
-
-    handleAddWatchlistItem();
-  } catch (error) {
-    console.error("Error updating/adding document: ", error);
-  } finally {
-    setIsSubmitting(false);
-    closeForm();
-  }
-};
-
-// Updated handleSubmit for EDIT watchlist modal (EditWatchListItemForm.jsx)
-
-const handleSubmitEdit = async (e) => {
-  e.preventDefault();
-  try {
-    const userDocRef = doc(db, "users", username);
-    const userDocSnapshot = await getDoc(userDocRef);
-
-    const watchlist = userDocSnapshot.data().watchlist || [];
-    if (watchlist && Array.isArray(watchlist)) {
-      const oldItem = watchlist.find(item => item.malID === selectedItem.malID);
-      const finalRating = getEffectiveRating();
-      
-      const updatedItem = {
-        ...editedData,
-        rating: finalRating,
-        dateAdded: editedData.dateAdded || new Date().toISOString()
-      };
-
-      const updatedWatchlist = watchlist.map((item) =>
-        item.malID === selectedItem.malID ? updatedItem : item
-      );
-
-      await updateDoc(userDocRef, { watchlist: updatedWatchlist });
-
-      // 🎉 AUTO-POST FOR STATUS CHANGES (Watching → Completed)
-      if (shouldCreateCompletionPost(oldItem, updatedItem)) {
-        const userData = userDocSnapshot.data();
-        await createWatchlistPost(updatedItem, userData, 'completed');
-      }
-
+      handleAddWatchlistItem();
+    } catch (error) {
+      console.error("Error updating/adding document: ", error);
+    } finally {
+      setIsSubmitting(false);
       closeForm();
     }
-  } catch (error) {
-    console.error("Error updating watchlist item:", error);
-  }
-};
+  };
 
-// 🧠 Smart logic to determine if we should post about completion
-const shouldCreateCompletionPost = (oldItem, newItem) => {
-  // Only post if status changed TO "Completed" from something else
-  return (
-    oldItem.status !== "Completed" && 
-    newItem.status === "Completed" &&
-    oldItem.status !== "Rewatching" // Don't post for rewatching completions
-  );
-};
+  // Updated handleSubmit for EDIT watchlist modal (EditWatchListItemForm.jsx)
 
-// 🎯 Enhanced post creation function
-const createWatchlistPost = async (animeData, userData, actionType) => {
-  try {
-    const postId = Math.random().toString(36).substring(2);
-    
-    let postText = "";
-    const ratingText = animeData.rating > 0 ? ` • Rating: ${"⭐".repeat(animeData.rating)}` : "";
-    
-    if (actionType === 'completed') {
-      // Special post for completions
-      postText = `Just completed **${animeData.title}**! 🎉✨\n`;
-      if (animeData.rating > 0) {
-        postText += `Gave it ${animeData.rating}/5 stars${ratingText}`;
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const userDocRef = doc(db, "users", username);
+      const userDocSnapshot = await getDoc(userDocRef);
+
+      const watchlist = userDocSnapshot.data().watchlist || [];
+      if (watchlist && Array.isArray(watchlist)) {
+        const oldItem = watchlist.find(
+          (item) => item.malID === selectedItem.malID
+        );
+        const finalRating = getEffectiveRating();
+
+        const updatedItem = {
+          ...editedData,
+          rating: finalRating,
+          dateAdded: editedData.dateAdded || new Date().toISOString(),
+        };
+
+        const updatedWatchlist = watchlist.map((item) =>
+          item.malID === selectedItem.malID ? updatedItem : item
+        );
+
+        await updateDoc(userDocRef, { watchlist: updatedWatchlist });
+
+        // 🎉 AUTO-POST FOR STATUS CHANGES (Watching → Completed)
+        if (shouldCreateCompletionPost(oldItem, updatedItem)) {
+          const userData = userDocSnapshot.data();
+          await createWatchlistPost(updatedItem, userData, "completed");
+        }
+
+        closeForm();
       }
-    } else {
-      // Posts for new additions
-      switch (animeData.status) {
-        case "Watching":
-          postText = `Started watching **${animeData.title}**! 📺✨\nStatus: ${animeData.status}${ratingText}`;
-          break;
-        case "Completed":
-          postText = `Just finished **${animeData.title}**! 🎉\nStatus: ${animeData.status}${ratingText}`;
-          break;
-        case "To Watch":
-          postText = `Added **${animeData.title}** to my plan to watch list! 📋\nStatus: ${animeData.status}`;
-          break;
-        case "Rewatching":
-          postText = `Rewatching **${animeData.title}** because it's that good! 🔄\nStatus: ${animeData.status}${ratingText}`;
-          break;
-        default:
-          postText = `Added **${animeData.title}** to my watchlist! ✨\nStatus: ${animeData.status}${ratingText}`;
-      }
+    } catch (error) {
+      console.error("Error updating watchlist item:", error);
     }
+  };
 
-    // Add user's review if they wrote one
-    if (animeData.thoughts && animeData.thoughts.trim()) {
-      postText += `\n\n"${animeData.thoughts.trim()}"`;
-    }
-
-    const postData = {
-      authId: userData.authId || userData.username, // Handle both cases
-      username: userData.username,
-      profilePic: userData.profilePic,
-      bio: userData.bio,
-      newPost: postText,
-      postPic: "",
-      selectedAnime: {
-        malID: animeData.malID,
-        title: animeData.title,
-        image: animeData.image,
-        episode: null
-      },
-      comments: [],
-      likes: [],
-      timestamp: serverTimestamp(),
-      isAutoPost: true // Flag to identify auto-generated posts
-    };
-
-    const postDocRef = doc(db, "posts", userData.authId || userData.username);
-    await setDoc(
-      postDocRef,
-      {
-        [postId]: {
-          postId,
-          ...postData,
-        },
-      },
-      { merge: true }
+  // 🧠 Smart logic to determine if we should post about completion
+  const shouldCreateCompletionPost = (oldItem, newItem) => {
+    // Only post if status changed TO "Completed" from something else
+    return (
+      oldItem.status !== "Completed" &&
+      newItem.status === "Completed" &&
+      oldItem.status !== "Rewatching" // Don't post for rewatching completions
     );
+  };
 
-    console.log(`Auto-post created for ${actionType}:`, animeData.title);
-  } catch (error) {
-    console.error("Error creating auto-post:", error);
-    // Don't fail the watchlist operation if post creation fails
-  }
-};
+  // 🎯 Enhanced post creation function
+  const createWatchlistPost = async (animeData, userData, actionType) => {
+    try {
+      const postId = Math.random().toString(36).substring(2);
+
+      let postText = "";
+      const ratingText =
+        animeData.rating > 0
+          ? ` • Rating: ${"⭐".repeat(animeData.rating)}`
+          : "";
+
+      if (actionType === "completed") {
+        // Special post for completions
+        postText = `Just completed **${animeData.title}**! 🎉✨\n`;
+        if (animeData.rating > 0) {
+          postText += `Gave it ${animeData.rating}/5 stars${ratingText}`;
+        }
+      } else {
+        // Posts for new additions
+        switch (animeData.status) {
+          case "Watching":
+            postText = `Started watching **${animeData.title}**! 📺✨\nStatus: ${animeData.status}${ratingText}`;
+            break;
+          case "Completed":
+            postText = `Just finished **${animeData.title}**! 🎉\nStatus: ${animeData.status}${ratingText}`;
+            break;
+          case "To Watch":
+            postText = `Added **${animeData.title}** to my plan to watch list! 📋\nStatus: ${animeData.status}`;
+            break;
+          case "Rewatching":
+            postText = `Rewatching **${animeData.title}** because it's that good! 🔄\nStatus: ${animeData.status}${ratingText}`;
+            break;
+          default:
+            postText = `Added **${animeData.title}** to my watchlist! ✨\nStatus: ${animeData.status}${ratingText}`;
+        }
+      }
+
+      // Add user's review if they wrote one
+      if (animeData.thoughts && animeData.thoughts.trim()) {
+        postText += `\n\n"${animeData.thoughts.trim()}"`;
+      }
+
+      const postData = {
+        authId: userData.authId || userData.username, // Handle both cases
+        username: userData.username,
+        profilePic: userData.profilePic,
+        bio: userData.bio,
+        newPost: postText,
+        postPic: "",
+        selectedAnime: {
+          malID: animeData.malID,
+          title: animeData.title,
+          image: animeData.image,
+          episode: null,
+        },
+        comments: [],
+        likes: [],
+        timestamp: serverTimestamp(),
+        isAutoPost: true, // Flag to identify auto-generated posts
+      };
+
+      const postDocRef = doc(db, "posts", userData.authId || userData.username);
+      await setDoc(
+        postDocRef,
+        {
+          [postId]: {
+            postId,
+            ...postData,
+          },
+        },
+        { merge: true }
+      );
+
+      console.log(`Auto-post created for ${actionType}:`, animeData.title);
+    } catch (error) {
+      console.error("Error creating auto-post:", error);
+      // Don't fail the watchlist operation if post creation fails
+    }
+  };
 
   const handleAnimeSelection = (anime) => {
     setTitle(`${anime.title}`);
@@ -300,7 +311,8 @@ const createWatchlistPost = async (animeData, userData, actionType) => {
   };
 
   const effectiveRating = getEffectiveRating();
-  const isAutoDetected = manualStarRating === 0 && parseReviewRating(thoughts) > 0;
+  const isAutoDetected =
+    manualStarRating === 0 && parseReviewRating(thoughts) > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -374,17 +386,21 @@ const createWatchlistPost = async (animeData, userData, actionType) => {
 
         {/* Rating */}
         <div className="mb-4">
-          <label className="block mb-2 font-medium text-gray-700">Rating:</label>
+          <label className="block mb-2 font-medium text-gray-700">
+            Rating:
+          </label>
           <div className="flex items-center gap-1 mb-2">
             {renderStars()}
             <span className="ml-2 text-sm text-gray-600">
               {effectiveRating > 0 ? `${effectiveRating}/5` : "No rating"}
               {isAutoDetected && (
-                <span className="text-xs text-blue-600 ml-1">(auto-detected)</span>
+                <span className="text-xs text-blue-600 ml-1">
+                  (auto-detected)
+                </span>
               )}
             </span>
           </div>
-          
+
           <div className="flex items-center gap-3 text-sm">
             {effectiveRating > 0 && (
               <button
@@ -395,16 +411,15 @@ const createWatchlistPost = async (animeData, userData, actionType) => {
                 Clear rating
               </button>
             )}
-            
+
             {isAutoDetected && (
-              <span className="text-blue-600">
-                Detected from review text
-              </span>
+              <span className="text-blue-600">Detected from review text</span>
             )}
           </div>
-          
+
           <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: Click stars for quick rating, or write &quot;(8.5/10)&quot; in your review for auto-detection
+            💡 Tip: Click stars for quick rating, or write &quot;(8.5/10)&quot;
+            in your review for auto-detection
           </p>
         </div>
 
@@ -430,7 +445,7 @@ const createWatchlistPost = async (animeData, userData, actionType) => {
             </div>
           </div>
         </div>
-   <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -445,20 +460,21 @@ const createWatchlistPost = async (animeData, userData, actionType) => {
               type="button"
               onClick={() => setShouldCreatePost(!shouldCreatePost)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                shouldCreatePost ? 'bg-primary' : 'bg-gray-300'
+                shouldCreatePost ? "bg-primary" : "bg-gray-300"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  shouldCreatePost ? 'translate-x-6' : 'translate-x-1'
+                  shouldCreatePost ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
           </div>
-          
+
           {shouldCreatePost && (
             <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700">
-              ✨ This will create a post: "Started watching {title || 'this anime'}! 📺"
+              ✨ This will create a post saying you started watching 
+              {title || "this anime"}! 📺
             </div>
           )}
         </div>
