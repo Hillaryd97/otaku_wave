@@ -114,10 +114,10 @@ function AllPosts() {
                 timePosted={timeAgo(post.timestamp)}
                 likes={post.likes ? post.likes.length : 0}
                 allLikes={post.likes}
-                // onLike={() =>
-                //   handleLike(post.postId, post.authId, post.username)
-                // }
-                // onComment={() => handleComment(post.postId)}
+                selectedAnime={post.selectedAnime} // ADD
+                watchlistAction={post.watchlistAction} // NEW
+                animeRating={post.animeRating} // NEW
+                animeStatus={post.animeStatus} // NEW
               />
             ))
         )}

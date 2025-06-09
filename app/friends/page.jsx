@@ -104,11 +104,11 @@ const ModernFriendsComponent = () => {
             </div>
 
             {/* Activity info */}
-            <div className="mt-3 space-y-2">
+            {/* <div className="mt-3 space-y-2">
               <p className="text-xs text-primary/70 font-medium">
                 {friend.lastActive ? getLastActiveText(friend.lastActive) : 'Just joined!'}
               </p>
-            </div>
+            </div> */}
 
             {/* Quick action */}
             <div className="flex items-center space-x-2 mt-4">

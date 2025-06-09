@@ -34,21 +34,20 @@ function AnimeSearchDropdown({ searchTerm, onSelect, searchType }) {
   const handleItemClick = (anime) => {
     onSelect(anime);
     setItemSelected(true);
-    console.log("itemcick")
+    console.log("itemcick");
   };
-  
+
   useEffect(() => {
     if (searchTerm && !itemSelected) {
-      setItemSelected(false); 
-    console.log("searchterm")
-
+      setItemSelected(false);
+      console.log("searchterm");
     }
   }, [searchTerm, itemSelected]);
-  
+
   return (
     <div>
       {itemSelected === false ? (
-        <div className="absolute mt-2 overflow-y-scroll h-44 w-full bg-white border rounded-md shadow-md">
+        <div className="absolute left-0 right-0 mt-2 overflow-y-scroll h-44 bg-white border rounded-md shadow-md z-50">
           {searchResults.length > 0 && searchTerm
             ? searchResults.map((anime) => (
                 <div key={anime.mal_id}>

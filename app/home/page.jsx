@@ -211,6 +211,9 @@ export default function Home() {
                 comments={post.comments || []}
                 allLikes={post.likes}
                 selectedAnime={post.selectedAnime}
+                watchlistAction={post.watchlistAction} // NEW
+                animeRating={post.animeRating} // NEW
+                animeStatus={post.animeStatus} // NEW
                 onLike={() =>
                   handleLike(post.postId, post.authId, post.username)
                 }

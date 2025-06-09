@@ -258,7 +258,7 @@ function MigrationHelper() {
         <h3 className="font-semibold text-blue-800 mb-2">What this does:</h3>
         <ul className="text-sm text-blue-700 space-y-1">
           <li>✅ Adds dates to all your anime (2024 & 2025)</li>
-          <li>✅ Converts your "(8.5/10)" ratings to stars</li>
+          <li>✅ Converts your (8.5/10) ratings to stars</li>
           <li>✅ Preserves all your review text</li>
           <li>✅ Maintains chronological order</li>
         </ul>

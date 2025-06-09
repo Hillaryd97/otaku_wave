@@ -23,13 +23,13 @@ function NewPostModal({ addPostModal }) {
   const [postPic, setpostPic] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // New anime selection states
   const [selectedAnime, setSelectedAnime] = useState(null);
   const [episode, setEpisode] = useState("");
   const [userWatchlist, setUserWatchlist] = useState([]);
   const [showAnimeDropdown, setShowAnimeDropdown] = useState(false);
-  
+  const [watchlistSearchQuery, setWatchlistSearchQuery] = useState("");
   const userDataJSON = sessionStorage.getItem("userData");
   const userSessionData = JSON.parse(userDataJSON);
   const username = userSessionData.user.uid;
@@ -40,7 +40,7 @@ function NewPostModal({ addPostModal }) {
       try {
         const userDocRef = doc(db, "users", username);
         const userDocSnapshot = await getDoc(userDocRef);
-        
+
         if (userDocSnapshot.exists()) {
           const userData = userDocSnapshot.data();
           setUserWatchlist(userData.watchlist || []);
@@ -54,7 +54,9 @@ function NewPostModal({ addPostModal }) {
       fetchUserWatchlist();
     }
   }, [username]);
-
+  const filteredWatchlist = userWatchlist.filter((anime) =>
+    anime.title.toLowerCase().includes(watchlistSearchQuery.toLowerCase())
+  );
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains("overlay")) {
       closeModal();
@@ -78,7 +80,7 @@ function NewPostModal({ addPostModal }) {
 
   const handleFileChange = async (e) => {
     if (isLoading) return;
-    
+
     const file = e.target.files[0];
     if (!file) return;
 
@@ -86,8 +88,8 @@ function NewPostModal({ addPostModal }) {
     if (file.size > maxSizeInBytes) {
       alert("File is too large! Please choose a smaller image.");
       return;
-    } 
-    
+    }
+
     if (!allowedImageTypes.includes(file.type)) {
       alert("Please upload a valid image file (JPG, PNG, or GIF).");
       return;
@@ -96,7 +98,10 @@ function NewPostModal({ addPostModal }) {
     try {
       setIsLoading(true);
       const storage = getStorage();
-      const storageRef = ref(storage, `posts/${username}/${Date.now()}_${file.name}`);
+      const storageRef = ref(
+        storage,
+        `posts/${username}/${Date.now()}_${file.name}`
+      );
       const snapshot = await uploadBytesResumable(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
       setpostPic(downloadURL);
@@ -125,7 +130,7 @@ function NewPostModal({ addPostModal }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting || (!newPost.trim() && !postPic && !selectedAnime)) return;
-    
+
     try {
       setIsSubmitting(true);
       const postId = generateRandomId();
@@ -133,7 +138,7 @@ function NewPostModal({ addPostModal }) {
       const userDocSnapshot = await getDoc(userDocRef);
 
       const userData = userDocSnapshot.data();
-      
+
       const postData = {
         authId: username,
         username: userData.username,
@@ -141,12 +146,14 @@ function NewPostModal({ addPostModal }) {
         bio: userData.bio,
         newPost: newPost.trim(),
         postPic: postPic,
-        selectedAnime: selectedAnime ? {
-          malID: selectedAnime.malID,
-          title: selectedAnime.title,
-          image: selectedAnime.image,
-          episode: episode || null
-        } : null,
+        selectedAnime: selectedAnime
+          ? {
+              malID: selectedAnime.malID,
+              title: selectedAnime.title,
+              image: selectedAnime.image,
+              episode: episode || null,
+            }
+          : null,
         comments: [],
         likes: [],
         timestamp: serverTimestamp(),
@@ -202,7 +209,9 @@ function NewPostModal({ addPostModal }) {
                 alt={selectedAnime.title}
               />
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">{selectedAnime.title}</p>
+                <p className="font-medium text-gray-900 truncate">
+                  {selectedAnime.title}
+                </p>
                 <div className="flex items-center gap-2 mt-1">
                   <input
                     type="number"
@@ -212,7 +221,9 @@ function NewPostModal({ addPostModal }) {
                     className="w-20 px-2 py-1 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="1"
                   />
-                  <span className="text-xs text-gray-500">{selectedAnime.status}</span>
+                  <span className="text-xs text-gray-500">
+                    {selectedAnime.status}
+                  </span>
                 </div>
               </div>
               <button
@@ -254,84 +265,96 @@ function NewPostModal({ addPostModal }) {
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-3">
-              {/* Image Upload */}
-              <label className="p-2 hover:bg-gray-100 rounded-full cursor-pointer transition-colors">
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  disabled={isLoading}
-                />
-                {isLoading ? (
-                  <div className="animate-spin w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full" />
-                ) : (
-                  <ImageIcon size={20} className="text-gray-600" />
-                )}
-              </label>
+<div className="relative flex items-center justify-between pt-4 border-t border-gray-100">
+  <div className="flex items-center gap-3">
+    {/* Image Upload */}
+    <label className="p-2 hover:bg-gray-100 rounded-full cursor-pointer transition-colors">
+      <input
+        type="file"
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={isLoading}
+      />
+      {isLoading ? (
+        <div className="animate-spin w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full" />
+      ) : (
+        <ImageIcon size={20} className="text-gray-600" />
+      )}
+    </label>
 
-              {/* Anime Selection */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowAnimeDropdown(!showAnimeDropdown)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <Film size={20} className="text-gray-600" />
-                </button>
+    {/* Anime Selection */}
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setShowAnimeDropdown(!showAnimeDropdown)}
+        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+      >
+        <Film size={20} className="text-gray-600" />
+      </button>
 
-                {/* Anime Dropdown */}
-                {showAnimeDropdown && (
-                  <div className="absolute bottom-full left-0 mb-2 w-80 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-10">
-                    <div className="p-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-700">Your Watchlist</p>
-                    </div>
-                    {userWatchlist.length > 0 ? (
-                      userWatchlist.map((anime) => (
-                        <div
-                          key={anime.malID}
-                          onClick={() => handleAnimeSelect(anime)}
-                          className="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors"
-                        >
-                          <Image
-                            src={anime.image || "/hero-image (2).jpg"}
-                            width={32}
-                            height={44}
-                            className="rounded object-cover"
-                            alt={anime.title}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{anime.title}</p>
-                            <p className="text-sm text-gray-500">{anime.status}</p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-6 text-center text-gray-500">
-                        <Film size={24} className="mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No anime in your watchlist</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting || (!newPost.trim() && !postPic && !selectedAnime)}
-              className="flex items-center gap-2 px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
-            >
-              {isSubmitting ? (
-                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-              ) : (
-                <Send size={16} />
-              )}
-              {isSubmitting ? "Posting..." : "Post"}
-            </button>
+      {/* Anime Dropdown */}
+    {showAnimeDropdown && (
+  <div
+    className="absolute top-full left-1/2 -translate-x-1/2 w-full max-w-[calc(100vw-1rem)] mb-2 max-h-[calc(100vh-20rem)] overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-10 mx-auto"
+  >
+    {/* Search Bar and Results (unchanged) */}
+    <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
+      <input
+        type="text"
+        placeholder="Search your watchlist..."
+        value={watchlistSearchQuery}
+        onChange={(e) => setWatchlistSearchQuery(e.target.value)}
+        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+      />
+    </div>
+    {filteredWatchlist.length > 0 ? (
+      filteredWatchlist.map((anime) => (
+        <div
+          key={anime.malID}
+          onClick={() => handleAnimeSelect(anime)}
+          className="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors border-b border-gray-50 last:border-b-0"
+        >
+          <Image
+            src={anime.image || "/hero-image (2).jpg"}
+            width={32}
+            height={44}
+            className="rounded object-cover"
+            alt={anime.title}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-gray-900 truncate">{anime.title}</p>
+            <p className="text-sm text-gray-500">{anime.status}</p>
           </div>
+        </div>
+      ))
+    ) : (
+      <div className="p-4 text-center text-gray-500">
+        <p className="text-sm">
+          {watchlistSearchQuery ? "No anime found" : "No anime in your watchlist"}
+        </p>
+      </div>
+    )}
+  </div>
+)}
+    </div>
+  </div>
+
+  <button
+    type="submit"
+    disabled={
+      isSubmitting || (!newPost.trim() && !postPic && !selectedAnime)
+    }
+    className="flex items-center gap-2 px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
+  >
+    {isSubmitting ? (
+      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+    ) : (
+      <Send size={16} />
+    )}
+    {isSubmitting ? "Posting..." : "Post"}
+  </button>
+</div>
         </form>
       </div>
     </div>
