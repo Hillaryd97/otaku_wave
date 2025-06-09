@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 function AddNewWatchlistItemEvent({
@@ -10,7 +16,9 @@ function AddNewWatchlistItemEvent({
   selectedItem,
 }) {
   const [title, setTitle] = useState(
-    `${selectedItem.media?.title?.english || selectedItem.media?.title?.english}`
+    `${
+      selectedItem.media?.title?.english || selectedItem.media?.title?.english
+    }`
   );
   const [status, setStatus] = useState("");
   const [selectedAnimeData, setSelectedAnimeData] = useState([]);
@@ -27,7 +35,15 @@ function AddNewWatchlistItemEvent({
   const userSessionData = JSON.parse(userDataJSON);
   const username = userSessionData?.user?.uid;
   const Swal = require("sweetalert2");
-
+  const updateLastActive = async (userId) => {
+    try {
+      await updateDoc(doc(db, "users", userId), {
+        lastActive: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Error updating last active:", error);
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Validate and submit the form
@@ -60,16 +76,35 @@ function AddNewWatchlistItemEvent({
         const existingWatchlist = userDocSnapshot.data().watchlist || [];
         const updatedWatchlist = [
           ...existingWatchlist,
-          { malID, title, status, thoughts, image, episodes, airingEpisode, airingStatus },
+          {
+            malID,
+            title,
+            status,
+            thoughts,
+            image,
+            episodes,
+            airingEpisode,
+            airingStatus,
+          },
         ];
 
         // Update the user document with the new watchlist array
         await updateDoc(userDocRef, { watchlist: updatedWatchlist });
+        updateLastActive(username);
       } else {
         // If the user document doesn't exist, create a new document with the watchlist
         await setDoc(userDocRef, {
           watchlist: [
-            { malID, title, status, thoughts, image, episodes, airingEpisode, airingStatus },
+            {
+              malID,
+              title,
+              status,
+              thoughts,
+              image,
+              episodes,
+              airingEpisode,
+              airingStatus,
+            },
           ],
         });
       }

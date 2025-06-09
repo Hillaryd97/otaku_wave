@@ -35,58 +35,45 @@ function UserProfile({ params }) {
   const handleItemClick = (item) => {
     dispatch(setActiveProfileItem(item));
   };
+
   const [loading, setLoading] = useState(true);
-  const userId = params.userId;
-  console.log(userId);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [viewingUser, setViewingUser] = useState(null); // Add this line!
+
+  const userId = params.userId;
   const userDataJSON =
     typeof window !== "undefined" ? sessionStorage.getItem("userData") : null;
   const userSessionData = userDataJSON ? JSON.parse(userDataJSON) : null;
   const username = userSessionData?.user?.uid || null;
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const userDataJSON = sessionStorage.getItem("userData");
-    const userData = JSON.parse(userDataJSON);
-    const authId = userData?.user?.uid; // Add a check for user
+    const userData = userDataJSON ? JSON.parse(userDataJSON) : null;
+    const authId = userData?.user?.uid;
+
+    // Set viewing user (could be null for non-logged in users)
+    setViewingUser(authId);
 
     if (userId) {
       const userDocRef = doc(db, "users", userId);
 
-      // Subscribe to changes in the user document
       const unsubscribe = onSnapshot(
         userDocRef,
         (doc) => {
           if (doc.exists()) {
-            // Extract the user data from the document
-            const userData = doc.data();
-            // console.log("User data:", userData);
-
-            // Set the user data in the component state
-            setUserData(userData);
+            setUserData(doc.data());
           } else {
-            // User document not found, it's a new user
-            // You can redirect to a different page or handle the creation of user data here
             console.log("User document not found.");
-            // Example: Redirect to a page where the user can create their data
-            // router.push("/create-user-data");
           }
           setLoading(false);
         },
         (error) => {
           console.error("Error in onSnapshot:", error);
+          setLoading(false);
         }
       );
-
-      // Cleanup function to unsubscribe when the component is unmounted
-      return () => {
-        // console.log("Unsubscribing from onSnapshot");
-        unsubscribe();
-      };
-    } else {
-      // Handle the case when authId is undefined
-      console.error("Authentication ID not found.");
-      setLoading(false);
+      return () => unsubscribe();
     }
   }, [userId]);
 
@@ -144,7 +131,6 @@ function UserProfile({ params }) {
         });
       }
 
-      console.log(clickedUserData);
       setIsFollowing(!isFollowing);
     } catch (error) {
       console.error("Error updating followers/following:", error);
@@ -154,6 +140,7 @@ function UserProfile({ params }) {
   const handleGoBack = () => {
     router.back();
   };
+
   return (
     <main className="bg-background flex flex-col h-fit w-full min-h-full justify-center pb-16 py-4 ">
       <div className="w-full ">
@@ -175,13 +162,7 @@ function UserProfile({ params }) {
             alt="image"
           />
           <div className="flex gap-5">
-            {/* <Link
-              href={"/followers"}
-              className="bg-primary font-bold text-white border px-3 py-0.5 shadow-sm rounded-lg hover:bg-opacity-80"
-            >
-              Friends
-            </Link> */}
-            {userId !== username && (
+            {viewingUser && userId !== viewingUser && (
               <button
                 onClick={handleFollow}
                 className={`border ${
@@ -201,10 +182,17 @@ function UserProfile({ params }) {
             )}
           </div>
 
+          {!viewingUser && (
+            <div className="text-center text-gray-500 text-sm">
+              👀 Viewing as guest • Sign up to interact
+            </div>
+          )}
+
           <div className="px-4 text-center">
             <p>{userData?.bio || "No Bio"}</p>
           </div>
         </div>
+
         <div className="">
           <div className="w-full flex">
             <div className="flex justify-between mt-6 w-full" ref={dropdownRef}>
@@ -239,19 +227,46 @@ function UserProfile({ params }) {
           </div>
         </div>
       </div>
+
+      {/* Login CTA for non-logged users */}
+      {!viewingUser && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 shadow-lg">
+          <div className="max-w-md mx-auto text-center">
+            <p className="font-semibold mb-2">Like what you see? 🌟</p>
+            <p className="text-sm mb-3">
+              Join our anime community to connect with {userData?.username}
+            </p>
+            <div className="flex space-x-2">
+              <Link
+                href="/register"
+                className="flex-1 bg-white text-blue-600 py-2 px-4 rounded-lg font-semibold"
+              >
+                Sign Up
+              </Link>
+              <Link
+                href="/login"
+                className="flex-1 bg-white/20 backdrop-blur py-2 px-4 rounded-lg font-semibold"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </main>
   );
 }
 
 export default UserProfile;
+
 const checkIfUserIsFollowing = async (authUserId, targetUserId) => {
   try {
     const targetUserRef = doc(db, "users", targetUserId);
     const targetUserData = (await getDoc(targetUserRef)).data();
 
     if (targetUserData && targetUserData.followers) {
-      // Check if the array includes an object with the auth user's details
       return targetUserData.followers.some(
         (follower) => follower.uid === authUserId
       );
