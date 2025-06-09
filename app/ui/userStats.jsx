@@ -16,8 +16,8 @@ function UserStats({ userData }) {
   // Check if user has 2024 data
   const hasDataForYear = (year) => {
     if (!userData?.watchlist) return false;
-    
-    return userData.watchlist.some(anime => {
+
+    return userData.watchlist.some((anime) => {
       if (!anime.dateAdded) return false;
       const addedYear = new Date(anime.dateAdded).getFullYear();
       return addedYear === year;
@@ -27,10 +27,12 @@ function UserStats({ userData }) {
   // Generate timeline options
   const getTimelineOptions = () => {
     const options = [];
-    
+
     // Current year months (from January to current month)
     for (let month = 0; month <= currentDate.getMonth(); month++) {
-      const monthName = new Date(currentYear, month).toLocaleString("default", { month: "long" });
+      const monthName = new Date(currentYear, month).toLocaleString("default", {
+        month: "long",
+      });
       const isCurrent = month === currentDate.getMonth();
       options.push({
         key: `${currentYear}-${month}`,
@@ -38,7 +40,7 @@ function UserStats({ userData }) {
         type: "month",
         isCurrent,
         year: currentYear,
-        month: month
+        month: month,
       });
     }
 
@@ -47,9 +49,9 @@ function UserStats({ userData }) {
       if (hasDataForYear(year)) {
         options.push({
           key: `${year}-wrapped`,
-          label: `🎊 ${year} Wrapped`,
+          label: ` ${year}`,
           type: "wrapped",
-          year: year
+          year: year,
         });
       }
     }
@@ -58,33 +60,37 @@ function UserStats({ userData }) {
   };
 
   const timelineOptions = getTimelineOptions();
-  
+
   // Set default to current month
   useEffect(() => {
     if (!selectedPeriod && timelineOptions.length > 0) {
-      const currentOption = timelineOptions.find(opt => opt.isCurrent);
-      setSelectedPeriod(currentOption ? currentOption.key : timelineOptions[0].key);
+      const currentOption = timelineOptions.find((opt) => opt.isCurrent);
+      setSelectedPeriod(
+        currentOption ? currentOption.key : timelineOptions[0].key
+      );
     }
   }, [timelineOptions, selectedPeriod]);
 
-  const selectedOption = timelineOptions.find(opt => opt.key === selectedPeriod) || timelineOptions[0];
+  const selectedOption =
+    timelineOptions.find((opt) => opt.key === selectedPeriod) ||
+    timelineOptions[0];
 
   // Filter watchlist by selected period
   const getFilteredWatchlist = () => {
     if (!userData?.watchlist || !selectedOption) return [];
-    
+
     const watchlist = userData.watchlist;
-    
+
     if (selectedOption.type === "wrapped") {
       // For wrapped, get all anime from that year
-      return watchlist.filter(anime => {
+      return watchlist.filter((anime) => {
         if (!anime.dateAdded) return false;
         const addedYear = new Date(anime.dateAdded).getFullYear();
         return addedYear === selectedOption.year;
       });
     } else {
       // For monthly, get anime from that specific month
-      return watchlist.filter(anime => {
+      return watchlist.filter((anime) => {
         if (!anime.dateAdded) return false;
         const addedDate = new Date(anime.dateAdded);
         return (
@@ -109,34 +115,46 @@ function UserStats({ userData }) {
         mostActiveDay: "Saturday",
         longestBinge: 0,
         newDiscoveries: 0,
-        completionRate: 0
+        completionRate: 0,
       });
       return;
     }
 
     const calculateStats = () => {
       const filteredWatchlist = getFilteredWatchlist();
-      
+
       // If it's current month, also include completed anime for better stats
       let statsWatchlist = filteredWatchlist;
       if (selectedOption.isCurrent) {
         // For current month, show overall stats but highlight recent activity
         statsWatchlist = userData.watchlist;
       }
-      
+
       // Filter by status
-      const completed = statsWatchlist.filter(anime => anime.status === "Completed");
-      const watching = statsWatchlist.filter(anime => anime.status === "Watching");
-      const planToWatch = statsWatchlist.filter(anime => anime.status === "To Watch");
-      const dropped = statsWatchlist.filter(anime => anime.status === "Dropped");
-      const rewatching = statsWatchlist.filter(anime => anime.status === "Rewatching");
-      
+      const completed = statsWatchlist.filter(
+        (anime) => anime.status === "Completed"
+      );
+      const watching = statsWatchlist.filter(
+        (anime) => anime.status === "Watching"
+      );
+      const planToWatch = statsWatchlist.filter(
+        (anime) => anime.status === "To Watch"
+      );
+      const dropped = statsWatchlist.filter(
+        (anime) => anime.status === "Dropped"
+      );
+      const rewatching = statsWatchlist.filter(
+        (anime) => anime.status === "Rewatching"
+      );
+
       // Calculate average rating - check for both rating field and text format
       let avgRating = 0;
-      const ratedAnime = completed.filter(anime => {
-        return anime.rating || (anime.thoughts && anime.thoughts.includes("/10"));
+      const ratedAnime = completed.filter((anime) => {
+        return (
+          anime.rating || (anime.thoughts && anime.thoughts.includes("/10"))
+        );
       });
-      
+
       if (ratedAnime.length > 0) {
         const total = ratedAnime.reduce((sum, anime) => {
           // Check if there's a direct rating field first
@@ -154,9 +172,10 @@ function UserStats({ userData }) {
       }
 
       // Calculate completion rate
-      const completionRate = statsWatchlist.length > 0 
-        ? Math.round((completed.length / statsWatchlist.length) * 100)
-        : 0;
+      const completionRate =
+        statsWatchlist.length > 0
+          ? Math.round((completed.length / statsWatchlist.length) * 100)
+          : 0;
 
       // New discoveries = anime added in this period
       const newDiscoveries = filteredWatchlist.length;
@@ -173,25 +192,28 @@ function UserStats({ userData }) {
         longestBinge: Math.max(1, Math.floor(Math.random() * 8)), // Mock data
         newDiscoveries: newDiscoveries,
         completionRate: completionRate,
-        periodLabel: selectedOption.type === "wrapped" ? `${selectedOption.year}` : selectedOption.label
+        periodLabel:
+          selectedOption.type === "wrapped"
+            ? `${selectedOption.year}`
+            : selectedOption.label,
       };
     };
 
     setStatsData(calculateStats());
   }, [userData, selectedPeriod, selectedOption]);
 
-//   const handleShare = () => {
-//     if (navigator.share) {
-//       navigator.share({
-//         title: `${userData?.username}'s Anime Stats - ${statsData?.periodLabel}`,
-//         text: `Check out my anime stats! I've completed ${statsData?.completed || 0} anime.`,
-//         url: window.location.href,
-//       });
-//     } else {
-//       navigator.clipboard.writeText(`Check out my anime stats: ${window.location.href}`);
-//       alert("Link copied to clipboard!");
-//     }
-//   };
+  //   const handleShare = () => {
+  //     if (navigator.share) {
+  //       navigator.share({
+  //         title: `${userData?.username}'s Anime Stats - ${statsData?.periodLabel}`,
+  //         text: `Check out my anime stats! I've completed ${statsData?.completed || 0} anime.`,
+  //         url: window.location.href,
+  //       });
+  //     } else {
+  //       navigator.clipboard.writeText(`Check out my anime stats: ${window.location.href}`);
+  //       alert("Link copied to clipboard!");
+  //     }
+  //   };
 
   if (!statsData || !selectedOption) {
     return (
@@ -205,11 +227,15 @@ function UserStats({ userData }) {
     if (navigator.share) {
       navigator.share({
         title: `${userData?.username}'s Anime Stats - ${currentMonth} ${currentYear}`,
-        text: `Check out my anime stats for ${currentMonth}! I've completed ${statsData?.completed || 0} anime.`,
+        text: `Check out my anime stats for ${currentMonth}! I've completed ${
+          statsData?.completed || 0
+        } anime.`,
         url: window.location.href,
       });
     } else {
-      navigator.clipboard.writeText(`Check out my anime stats: ${window.location.href}`);
+      navigator.clipboard.writeText(
+        `Check out my anime stats: ${window.location.href}`
+      );
       alert("Link copied to clipboard!");
     }
   };
@@ -220,10 +246,11 @@ function UserStats({ userData }) {
         <p>Loading stats...</p>
       </div>
     );
+
   }
 
-      return (
-    <div className="bg-gray-400 bg-opacity-20 w-full px-3 pt-3 flex flex-col space-y-4">
+  return (
+    <div className="bg-gray-400 bg-opacity-20 w-full px-3 mb-8 pt-3 flex flex-col space-y-4">
       {/* Period Selector */}
       <div className="relative w-64 mx-auto">
         <button
@@ -233,7 +260,11 @@ function UserStats({ userData }) {
           <span className="font-medium text-sm">
             {selectedOption?.label || `${currentMonth} ${currentYear}`}
           </span>
-          <FaChevronDown className={`transform transition-transform text-xs ${showDropdown ? 'rotate-180' : ''}`} />
+          <FaChevronDown
+            className={`transform transition-transform text-xs ${
+              showDropdown ? "rotate-180" : ""
+            }`}
+          />
         </button>
 
         {showDropdown && (
@@ -246,8 +277,14 @@ function UserStats({ userData }) {
                   setShowDropdown(false);
                 }}
                 className={`w-full text-left px-3 py-2 hover:bg-gray-50 text-sm ${
-                  option.isCurrent ? 'bg-primary text-white hover:bg-primary' : ''
-                } ${option.type === 'wrapped' && index > 0 ? 'border-t border-gray-100' : ''}`}
+                  option.isCurrent
+                    ? "bg-primary text-white hover:bg-primary"
+                    : ""
+                } ${
+                  option.type === "wrapped" && index > 0
+                    ? "border-t border-gray-100"
+                    : ""
+                }`}
               >
                 {option.label}
               </button>
@@ -262,7 +299,9 @@ function UserStats({ userData }) {
         <div className="flex justify-between items-center mb-4">
           <div>
             <h3 className="font-semibold text-lg">
-              {selectedOption.type === "wrapped" ? `${selectedOption.year} Wrapped` : selectedOption.label}
+              {selectedOption.type === "wrapped"
+                ? `${selectedOption.year} Stats`
+                : selectedOption.label}
             </h3>
             <p className="text-gray-600 text-sm">
               @{userData?.username || "user"}
@@ -281,22 +320,30 @@ function UserStats({ userData }) {
         {/* Main Stats Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-secondary bg-opacity-40 rounded p-3 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">{statsData.completed}</div>
+            <div className="text-2xl font-bold text-primary mb-1">
+              {statsData.completed}
+            </div>
             <div className="text-gray-700 text-sm">Completed</div>
           </div>
-          
+
           <div className="bg-secondary bg-opacity-40 rounded p-3 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">{statsData.watching}</div>
+            <div className="text-2xl font-bold text-primary mb-1">
+              {statsData.watching}
+            </div>
             <div className="text-gray-700 text-sm">Watching</div>
           </div>
-          
+
           <div className="bg-secondary bg-opacity-40 rounded p-3 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">{statsData.averageRating || "0"}</div>
+            <div className="text-2xl font-bold text-primary mb-1">
+              {statsData.averageRating || "0"}
+            </div>
             <div className="text-gray-700 text-sm">Avg Rating</div>
           </div>
-          
+
           <div className="bg-secondary bg-opacity-40 rounded p-3 text-center">
-            <div className="text-2xl font-bold text-primary mb-1">{statsData.completionRate}%</div>
+            <div className="text-2xl font-bold text-primary mb-1">
+              {statsData.completionRate}%
+            </div>
             <div className="text-gray-700 text-sm">Completed</div>
           </div>
         </div>
@@ -326,10 +373,12 @@ function UserStats({ userData }) {
               <span className="font-medium">{statsData.dropped}</span>
             </div>
           )}
-          
+
           <div className="flex justify-between">
             <span className="text-gray-600">Added this period:</span>
-            <span className="font-medium">{statsData.newDiscoveries} anime</span>
+            <span className="font-medium">
+              {statsData.newDiscoveries} anime
+            </span>
           </div>
         </div>
       </div>

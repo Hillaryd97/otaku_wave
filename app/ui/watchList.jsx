@@ -287,7 +287,7 @@ function WatchList() {
                 <div className="flex flex-col items-center justify-center h-[15rem] text-gray-500">
                   <p className="text-base font-medium">No anime found</p>
                   <p className="text-sm text-center mt-1">
-                    No anime with status "{statusOptions.find(s => s.value === statusFilter)?.label}"
+                  No anime with status &quot;{statusOptions.find(s => s.value === statusFilter)?.label}&quot;
                   </p>
                   <button
                     onClick={() => setStatusFilter("all")}

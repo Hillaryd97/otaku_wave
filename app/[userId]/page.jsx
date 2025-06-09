@@ -228,7 +228,7 @@ function UserProfile({ params }) {
         </div>
       </div>
 
-      {/* Login CTA for non-logged users */}
+      {/* Login CTA for non-logged users - SAME AS SEARCH PROFILE */}
       {!viewingUser && (
         <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 shadow-lg">
           <div className="max-w-md mx-auto text-center">

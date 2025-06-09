@@ -34,6 +34,7 @@ function Search() {
   const [recentSearches, setRecentSearches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
   // Get current user data
@@ -42,17 +43,20 @@ function Search() {
       typeof window !== "undefined" ? sessionStorage.getItem("userData") : null;
     const userSessionData = userDataJSON ? JSON.parse(userDataJSON) : null;
 
-    if (!userSessionData || !userSessionData.user) {
-      router.push("/login");
-      return;
+    if (userSessionData && userSessionData.user) {
+      setCurrentUser(userSessionData.user.uid);
+      setIsLoggedIn(true);
+    } else {
+      setCurrentUser(null);
+      setIsLoggedIn(false);
     }
 
-    setCurrentUser(userSessionData.user.uid);
-
-    // Load recent searches from localStorage
-    const savedSearches = localStorage.getItem("recentSearches");
-    if (savedSearches) {
-      setRecentSearches(JSON.parse(savedSearches));
+    // Load recent searches from localStorage (only for logged-in users)
+    if (userSessionData && userSessionData.user) {
+      const savedSearches = localStorage.getItem("recentSearches");
+      if (savedSearches) {
+        setRecentSearches(JSON.parse(savedSearches));
+      }
     }
   }, [router]);
 
@@ -115,6 +119,9 @@ function Search() {
   };
 
   const addToRecentSearches = (user) => {
+    // Only add to recent searches if user is logged in
+    if (!isLoggedIn) return;
+
     const searchItem = {
       uid: user.uid,
       username: user.username,
@@ -168,7 +175,7 @@ function Search() {
                 </p>
               </div>
 
-              {isRecent && (
+              {isRecent && isLoggedIn && (
                 <button
                   onClick={(e) => removeFromRecentSearches(user.uid, e)}
                   className="p-1 hover:bg-red-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
@@ -208,15 +215,8 @@ function Search() {
       <div className="bg-background ">
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="flex items-center space-x-4 mb-6">
-            {/* <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button> */}
             <div className="flex-1 text-center">
               <h1 className="text-2xl font-bold text-center w-full">Search</h1>
-              {/* <p className="text-gray-600 mt-1">Find your anime community</p> */}
             </div>
           </div>
 
@@ -244,8 +244,8 @@ function Search() {
 
       {/* Results Section */}
       <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Recent Searches */}
-        {!searchQuery && recentSearches.length > 0 && (
+        {/* Recent Searches - Only show for logged-in users */}
+        {!searchQuery && recentSearches.length > 0 && isLoggedIn && (
           <div className="mb-8">
             <div className="flex items-center space-x-2 mb-4">
               <Clock className="w-5 h-5 text-gray-500" />
@@ -292,7 +292,7 @@ function Search() {
                     No users found
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    No users match "{searchQuery}". Try a different username or
+                    No users match &quot;{searchQuery}&quot;. Try a different username or
                     check your spelling.
                   </p>
                 </div>
@@ -302,7 +302,7 @@ function Search() {
         )}
 
         {/* Empty State */}
-        {!searchQuery && recentSearches.length === 0 && (
+        {!searchQuery && (!isLoggedIn || recentSearches.length === 0) && (
           <div className="text-center py-16">
             <div className="bg-gradient-to-br from-white to-red-50/50 rounded-3xl p-12 shadow-xl border border-red-100/50 max-w-md mx-auto">
               <SearchIcon className="w-20 h-20 text-red-400/40 mx-auto mb-6" />
@@ -313,10 +313,41 @@ function Search() {
                 Search for users by their username to connect with fellow anime
                 fans! 🌟
               </p>
+              {!isLoggedIn && (
+                <div className="mt-4 text-sm text-gray-500">
+                  👀 Viewing as guest • Sign up to save recent searches
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
+
+      {/* Login CTA for non-logged users - SAME AS USER PROFILE */}
+      {!isLoggedIn && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 shadow-lg">
+          <div className="max-w-md mx-auto text-center">
+            <p className="font-semibold mb-2">Like what you see? 🌟</p>
+            <p className="text-sm mb-3">
+              Join our anime community to connect with other fans
+            </p>
+            <div className="flex space-x-2">
+              <Link
+                href="/register"
+                className="flex-1 bg-white text-blue-600 py-2 px-4 rounded-lg font-semibold"
+              >
+                Sign Up
+              </Link>
+              <Link
+                href="/login"
+                className="flex-1 bg-white/20 backdrop-blur py-2 px-4 rounded-lg font-semibold"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </main>

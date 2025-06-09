@@ -246,7 +246,7 @@ function EditWatchListItemForm({ selectedItem, closeForm }) {
           </div>
           
           <p className="text-xs text-gray-500 mt-2">
-            💡 Tip: Click stars for quick rating, or write "(8.5/10)" in your review for auto-detection
+        💡 Tip: Click stars for quick rating, or write &quot;(8.5/10)&quot; in your review for auto-detection
           </p>
         </div>
 
